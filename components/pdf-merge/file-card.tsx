@@ -27,12 +27,12 @@ export function FileCard({ file, onRemove, className }: FileCardProps) {
   return (
     <div
       className={cn(
-        "flex items-center gap-3 rounded-lg border border-[#e5e7eb] bg-white p-3 shadow-sm",
+        "flex items-center gap-3 rounded-lg border border-border bg-card p-3 shadow-sm",
         className
       )}
     >
       {/* Drag Handle */}
-      <div className="cursor-grab text-gray-400">
+      <div className="cursor-grab text-muted-foreground">
         <svg
           className="h-5 w-5"
           viewBox="0 0 24 24"
@@ -53,10 +53,10 @@ export function FileCard({ file, onRemove, className }: FileCardProps) {
 
       {/* File Info */}
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium text-[#111827] truncate">
+        <p className="text-sm font-medium text-foreground truncate">
           {file.name}
         </p>
-        <p className="text-xs text-[#9ca3af]">{file.size}</p>
+        <p className="text-xs text-muted-foreground">{file.size}</p>
       </div>
 
       {/* Pages Badge */}
@@ -74,7 +74,7 @@ export function FileCard({ file, onRemove, className }: FileCardProps) {
         <Button
           variant="ghost"
           size="icon"
-          className="h-8 w-8 text-gray-400 hover:text-red-500"
+          className="h-8 w-8 text-muted-foreground hover:text-destructive"
           onClick={() => onRemove?.(file.id)}
         >
           <X className="h-4 w-4" />

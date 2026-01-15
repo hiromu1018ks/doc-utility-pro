@@ -43,7 +43,7 @@ export function Sidebar({ currentPath = "/", onClose }: SidebarProps) {
   const pathname = usePathname() || currentPath
 
   return (
-    <aside className="flex h-full w-64 flex-col bg-[#1e293b] text-[#f1f5f9]">
+    <aside className="flex h-full w-64 flex-col bg-sidebar text-sidebar-foreground">
       {/* Logo */}
       <div className="flex items-center justify-between p-6">
         <Link href="/dashboard" className="flex items-center gap-2">
@@ -55,14 +55,14 @@ export function Sidebar({ currentPath = "/", onClose }: SidebarProps) {
         <Button
           variant="ghost"
           size="icon"
-          className="text-gray-400 lg:hidden"
+          className="text-muted-foreground lg:hidden"
           onClick={onClose}
         >
           <X className="h-5 w-5" />
         </Button>
       </div>
 
-      <Separator className="bg-[#334155]" />
+      <Separator className="bg-sidebar-border" />
 
       {/* Navigation */}
       <nav className="flex-1 space-y-1 px-3 py-4">
@@ -80,8 +80,8 @@ export function Sidebar({ currentPath = "/", onClose }: SidebarProps) {
               className={cn(
                 "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
                 isActive
-                  ? "bg-[#2563eb] text-white"
-                  : "text-[#94a3b8] hover:bg-[#334155] hover:text-white"
+                  ? "bg-primary text-primary-foreground"
+                  : "text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
               )}
             >
               {Icon && <Icon className="h-5 w-5" />}
@@ -91,17 +91,17 @@ export function Sidebar({ currentPath = "/", onClose }: SidebarProps) {
         })}
       </nav>
 
-      <Separator className="bg-[#334155]" />
+      <Separator className="bg-sidebar-border" />
 
       {/* User Section */}
       <div className="p-4">
-        <div className="flex items-center gap-3 rounded-lg bg-[#334155] p-3">
+        <div className="flex items-center gap-3 rounded-lg bg-sidebar-accent p-3">
           <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary">
             <span className="text-sm font-medium text-white">田</span>
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-white truncate">田中 太郎</p>
-            <p className="text-xs text-[#94a3b8] truncate">tanaka@example.com</p>
+            <p className="text-sm font-medium text-sidebar-accent-foreground truncate">田中 太郎</p>
+            <p className="text-xs text-muted-foreground truncate">tanaka@example.com</p>
           </div>
         </div>
       </div>

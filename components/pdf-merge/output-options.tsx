@@ -17,9 +17,9 @@ export function OutputOptions() {
   })
 
   return (
-    <div className="flex h-full flex-col bg-gray-50">
+    <div className="flex h-full flex-col bg-muted/30">
       <div className="p-4">
-        <h2 className="text-sm font-semibold text-[#374151]">出力オプション</h2>
+        <h2 className="text-sm font-semibold text-foreground">出力オプション</h2>
       </div>
 
       <Separator />
@@ -27,7 +27,7 @@ export function OutputOptions() {
       <div className="flex-1 space-y-6 p-4">
         {/* 結合順序 */}
         <div className="space-y-3">
-          <h3 className="text-xs font-medium text-[#6b7280] uppercase">
+          <h3 className="text-xs font-medium text-muted-foreground uppercase">
             結合順序
           </h3>
           <div className="space-y-2">
@@ -36,17 +36,17 @@ export function OutputOptions() {
                 type="radio"
                 name="order"
                 defaultChecked
-                className="h-4 w-4 border-gray-300 text-primary focus:ring-primary"
+                className="h-4 w-4 border-input text-primary focus:ring-primary"
               />
-              <span className="text-[#374151]">元の順序</span>
+              <span className="text-foreground">元の順序</span>
             </label>
             <label className="flex items-center gap-2 text-sm">
               <input
                 type="radio"
                 name="order"
-                className="h-4 w-4 border-gray-300 text-primary focus:ring-primary"
+                className="h-4 w-4 border-input text-primary focus:ring-primary"
               />
-              <span className="text-[#374151]">ファイル名順</span>
+              <span className="text-foreground">ファイル名順</span>
             </label>
           </div>
         </div>
@@ -56,10 +56,10 @@ export function OutputOptions() {
         {/* ファイル名オプション */}
         <div className="flex items-center justify-between">
           <div className="space-y-0.5">
-            <Label htmlFor="keep-filename" className="text-sm text-[#374151]">
+            <Label htmlFor="keep-filename" className="text-sm text-foreground">
               ファイル名を維持する
             </Label>
-            <p className="text-xs text-[#9ca3af]">
+            <p className="text-xs text-muted-foreground">
               元のファイル名を保持します
             </p>
           </div>
@@ -75,10 +75,10 @@ export function OutputOptions() {
         {/* しおりオプション */}
         <div className="flex items-center justify-between">
           <div className="space-y-0.5">
-            <Label htmlFor="bookmarks" className="text-sm text-[#374151]">
+            <Label htmlFor="bookmarks" className="text-sm text-foreground">
               しおり (目次) を作成
             </Label>
-            <p className="text-xs text-[#9ca3af]">
+            <p className="text-xs text-muted-foreground">
               ファイル名を目次として追加します
             </p>
           </div>
@@ -98,7 +98,7 @@ export function OutputOptions() {
 
         {/* 画像品質 */}
         <div className="space-y-2">
-          <Label htmlFor="quality" className="text-sm text-[#374151]">
+          <Label htmlFor="quality" className="text-sm text-foreground">
             画像品質
           </Label>
           <Select
@@ -119,10 +119,10 @@ export function OutputOptions() {
         {/* ファイルサイズ最適化 */}
         <div className="flex items-center justify-between">
           <div className="space-y-0.5">
-            <Label htmlFor="optimize" className="text-sm text-[#374151]">
+            <Label htmlFor="optimize" className="text-sm text-foreground">
               ファイルサイズを最適化
             </Label>
-            <p className="text-xs text-[#9ca3af]">
+            <p className="text-xs text-muted-foreground">
               出力ファイルを圧縮します
             </p>
           </div>

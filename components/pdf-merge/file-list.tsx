@@ -17,7 +17,7 @@ export function FileList({ files, onRemove, className }: FileListProps) {
   return (
     <div className={className}>
       <div className="mb-2 flex items-center justify-between">
-        <p className="text-sm font-medium text-[#374151]">
+        <p className="text-sm font-medium text-foreground">
           アップロード済みファイル ({files.length})
         </p>
       </div>

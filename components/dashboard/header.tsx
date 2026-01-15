@@ -10,7 +10,7 @@ interface HeaderProps {
 
 export function Header({ title = "ダッシュボード", onMenuClick }: HeaderProps) {
   return (
-    <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-white px-6">
+    <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b border-border bg-background px-6">
       <Button
         variant="ghost"
         size="icon"
@@ -21,17 +21,17 @@ export function Header({ title = "ダッシュボード", onMenuClick }: HeaderP
       </Button>
 
       <div className="flex flex-1 items-center gap-4">
-        <h1 className="text-xl font-semibold text-[#1f2937]">{title}</h1>
+        <h1 className="text-xl font-semibold text-foreground">{title}</h1>
       </div>
 
       <div className="flex items-center gap-2">
         {/* Search */}
         <div className="relative hidden md:block">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <input
             type="text"
             placeholder="検索..."
-            className="h-9 w-64 rounded-lg border border-[#e5e7eb] bg-[#f9fafb] pl-9 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+            className="h-9 w-64 rounded-lg border border-input bg-background pl-9 pr-4 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
           />
         </div>
 

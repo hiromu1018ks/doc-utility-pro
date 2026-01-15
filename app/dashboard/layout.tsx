@@ -25,7 +25,7 @@ export default function DashboardLayout({
   }
 
   return (
-    <div className="flex h-screen overflow-hidden bg-gray-50">
+    <div className="flex h-screen overflow-hidden bg-background">
       {/* Sidebar - Desktop */}
       <div className="hidden lg:block">
         <Sidebar currentPath={pathname || "/"} />

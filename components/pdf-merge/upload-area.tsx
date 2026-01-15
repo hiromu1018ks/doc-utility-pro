@@ -11,17 +11,17 @@ export function UploadArea({ className }: UploadAreaProps) {
   return (
     <div
       className={cn(
-        "flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-[#d1d5db] bg-[#f9fafb] p-8 text-center transition-colors hover:border-primary/50 hover:bg-blue-50/30",
+        "flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-border bg-muted/50 p-8 text-center transition-colors hover:border-primary/50 hover:bg-muted",
         className
       )}
     >
-      <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-white">
-        <Upload className="h-6 w-6 text-[#9ca3af]" />
+      <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-card">
+        <Upload className="h-6 w-6 text-muted-foreground" />
       </div>
-      <p className="text-sm font-medium text-[#374151]">
+      <p className="text-sm font-medium text-foreground">
         ここにファイルをドラッグ&ドロップ、またはクリックして選択
       </p>
-      <p className="mt-1 text-xs text-[#9ca3af]">PDF、DOCXファイル（最大50MB）</p>
+      <p className="mt-1 text-xs text-muted-foreground">PDF、DOCXファイル（最大50MB）</p>
     </div>
   )
 }

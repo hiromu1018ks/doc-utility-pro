@@ -86,10 +86,10 @@ export default function DashboardPage() {
     <div className="space-y-6 p-6">
       {/* Welcome Section */}
       <div>
-        <h2 className="text-2xl font-bold text-[#1f2937]">
+        <h2 className="text-2xl font-bold text-foreground">
           おかえりなさい、田中さん
         </h2>
-        <p className="mt-1 text-[#6b7280]">
+        <p className="mt-1 text-muted-foreground">
           本日のドキュメント処理状況を確認してください
         </p>
       </div>
@@ -101,12 +101,12 @@ export default function DashboardPage() {
           return (
             <Card key={stat.label}>
               <CardContent className="flex items-center gap-4 p-6">
-                <div className={`rounded-lg bg-gray-100 p-3 ${stat.color}`}>
+                <div className={`rounded-lg bg-muted p-3 ${stat.color}`}>
                   <Icon className="h-6 w-6" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-[#1f2937]">{stat.value}</p>
-                  <p className="text-sm text-[#6b7280]">{stat.label}</p>
+                  <p className="text-2xl font-bold text-foreground">{stat.value}</p>
+                  <p className="text-sm text-muted-foreground">{stat.label}</p>
                 </div>
               </CardContent>
             </Card>
@@ -116,7 +116,7 @@ export default function DashboardPage() {
 
       {/* Quick Tools */}
       <div>
-        <h3 className="mb-4 text-lg font-semibold text-[#1f2937]">
+        <h3 className="mb-4 text-lg font-semibold text-foreground">
           クイックアクセス
         </h3>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -129,8 +129,8 @@ export default function DashboardPage() {
                     <div className={`mb-3 flex h-12 w-12 items-center justify-center rounded-lg ${tool.color}`}>
                       <Icon className="h-6 w-6 text-white" />
                     </div>
-                    <h4 className="font-semibold text-[#1f2937]">{tool.title}</h4>
-                    <p className="mt-1 text-sm text-[#6b7280]">{tool.description}</p>
+                    <h4 className="font-semibold text-foreground">{tool.title}</h4>
+                    <p className="mt-1 text-sm text-muted-foreground">{tool.description}</p>
                     <Button
                       variant="ghost"
                       size="sm"
@@ -151,7 +151,7 @@ export default function DashboardPage() {
       <Card>
         <CardContent className="p-6">
           <div className="mb-4 flex items-center justify-between">
-            <h3 className="text-lg font-semibold text-[#1f2937]">
+            <h3 className="text-lg font-semibold text-foreground">
               最近のアクティビティ
             </h3>
             <Button variant="ghost" size="sm">
@@ -163,15 +163,15 @@ export default function DashboardPage() {
             {recentFiles.map((file) => (
               <div
                 key={file.id}
-                className="flex items-center justify-between rounded-lg border border-[#e5e7eb] bg-white p-3"
+                className="flex items-center justify-between rounded-lg border border-border bg-card p-3"
               >
                 <div className="flex items-center gap-3">
                   <FileText className="h-5 w-5 text-red-500" />
                   <div>
-                    <p className="text-sm font-medium text-[#1f2937]">
+                    <p className="text-sm font-medium text-foreground">
                       {file.name}
                     </p>
-                    <p className="text-xs text-[#9ca3af]">
+                    <p className="text-xs text-muted-foreground">
                       {file.action}・{file.time}
                     </p>
                   </div>

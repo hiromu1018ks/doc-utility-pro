@@ -20,10 +20,10 @@ export default function PDFMergePage() {
         <div className="mx-auto max-w-3xl space-y-6">
           {/* Page Title */}
           <div>
-            <h2 className="text-lg font-bold text-[#1f2937]">
+            <h2 className="text-lg font-bold text-foreground">
               PDFファイルの結合 - ワークスペース
             </h2>
-            <p className="mt-1 text-sm text-[#6b7280]">
+            <p className="mt-1 text-sm text-muted-foreground">
               複数のPDFファイルを1つに結合できます
             </p>
           </div>
@@ -37,7 +37,7 @@ export default function PDFMergePage() {
       </div>
 
       {/* Right Panel - Output Options */}
-      <div className="hidden w-80 border-l border-[#e5e7eb] xl:block">
+      <div className="hidden w-80 border-l border-border xl:block">
         <OutputOptions />
       </div>
     </div>
