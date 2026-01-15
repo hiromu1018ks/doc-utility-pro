@@ -22,7 +22,7 @@
 
   /* Muted */
   --muted: #f3f4f6;
-  --muted-foreground: #9ca3af;
+  --muted-foreground: #334155;
 
   /* Accent */
   --accent: #f3f4f6;
@@ -48,6 +48,17 @@
   --sidebar-ring: #3b82f6;
 
   --radius: 0.5rem;
+
+  /* Proofreading - Diff highlights */
+  --diff-add-bg: #dcfce7;
+  --diff-add-text: #166534;
+  --diff-remove-bg: #fee2e2;
+  --diff-remove-text: #991b1b;
+
+  /* Proofreading - Status colors */
+  --status-warning-bg: #fef9c3;
+  --status-warning-text: #854d0e;
+  --status-warning-border: #fde047;
 }
 
 @theme inline {
@@ -73,13 +84,53 @@
   --color-sidebar: var(--sidebar);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --color-diff-add-bg: var(--diff-add-bg);
+  --color-diff-add-text: var(--diff-add-text);
+  --color-diff-remove-bg: var(--diff-remove-bg);
+  --color-diff-remove-text: var(--diff-remove-text);
+  --color-status-warning-bg: var(--status-warning-bg);
+  --color-status-warning-text: var(--status-warning-text);
+  --color-status-warning-border: var(--status-warning-border);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+.dark {
+  --background: #0a0a0a;
+  --foreground: #ededed;
+
+  /* Card (dark mode) */
+  --card: #0a0a0a;
+  --card-foreground: #ededed;
+
+  /* Popover (dark mode) */
+  --popover: #0a0a0a;
+  --popover-foreground: #ededed;
+
+  /* Muted (dark mode) */
+  --muted: #1e293b;
+  --muted-foreground: #94a3b8;
+
+  /* Accent (dark mode) */
+  --accent: #1e293b;
+  --accent-foreground: #cbd5e1;
+
+  /* Border (dark mode) */
+  --border: #334155;
+  --input: #334155;
+
+  /* Secondary (dark mode) */
+  --secondary: #1e293b;
+  --secondary-foreground: #cbd5e1;
+
+  /* Proofreading - Diff highlights (dark mode) */
+  --diff-add-bg: #14532d;
+  --diff-add-text: #bbf7d0;
+  --diff-remove-bg: #7f1d1d;
+  --diff-remove-text: #fecaca;
+
+  /* Proofreading - Status colors (dark mode) */
+  --status-warning-bg: #422006;
+  --status-warning-text: #fef9c3;
+  --status-warning-border: #713f12;
 }
 
 body {
