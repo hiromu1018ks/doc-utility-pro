@@ -71,13 +71,17 @@ export const FileList = memo(function FileList({
       >
         <div className="space-y-2">
           {files.map((file) => (
-            <FileCard
+            <div
               key={file.id}
-              id={file.id}
-              file={file}
-              onRemove={onRemove}
-              draggable={!disabled}
-            />
+              className="[content-visibility:auto] [contain-intrinsic-size:0_5rem]"
+            >
+              <FileCard
+                id={file.id}
+                file={file}
+                onRemove={onRemove}
+                draggable={!disabled}
+              />
+            </div>
           ))}
         </div>
       </DndContext>

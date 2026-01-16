@@ -1,15 +1,60 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, Suspense } from 'react'
 import { usePdfMerge } from '@/hooks/use-pdf-merge'
-import { UploadArea } from '@/components/pdf-merge/upload-area'
-import { FileList } from '@/components/pdf-merge/file-list'
-import { OutputOptions } from '@/components/pdf-merge/output-options'
-import { MergeProgress } from '@/components/pdf-merge/merge-progress'
+import dynamic from 'next/dynamic'
 import { DEFAULT_PDF_MERGE_OPTIONS, type PdfMergeOptions } from '@/types'
 import AlertCircle from 'lucide-react/dist/esm/icons/alert-circle'
 import X from 'lucide-react/dist/esm/icons/x'
 import { Button } from '@/components/ui/button'
+
+// Dynamic imports for better bundle splitting
+// PDF-related components are client-side only (ssr: false) due to pdf-lib
+const UploadArea = dynamic(
+  () => import('@/components/pdf-merge/upload-area').then(mod => ({ default: mod.UploadArea })),
+  {
+    loading: () => (
+      <div className="rounded-lg border-2 border-dashed border-border bg-card p-12 animate-pulse">
+        <div className="flex flex-col items-center justify-center">
+          <div className="h-12 w-12 bg-muted/50 rounded-full mb-4" />
+          <div className="h-4 bg-muted/50 rounded w-48 mb-2" />
+          <div className="h-3 bg-muted/50 rounded w-32" />
+        </div>
+      </div>
+    ),
+    ssr: false
+  }
+)
+
+const FileList = dynamic(
+  () => import('@/components/pdf-merge/file-list').then(mod => ({ default: mod.FileList })),
+  {
+    loading: () => (
+      <div className="rounded-lg border border-border bg-card p-4 animate-pulse">
+        <div className="h-24 bg-muted/50 rounded" />
+      </div>
+    ),
+    ssr: false
+  }
+)
+
+const OutputOptions = dynamic(
+  () => import('@/components/pdf-merge/output-options').then(mod => ({ default: mod.OutputOptions })),
+  {
+    loading: () => (
+      <div className="w-80 h-full bg-muted/30 animate-pulse" />
+    ),
+    ssr: false
+  }
+)
+
+const MergeProgress = dynamic(
+  () => import('@/components/pdf-merge/merge-progress').then(mod => ({ default: mod.MergeProgress })),
+  {
+    loading: () => <div className="h-12 bg-muted/50 rounded animate-pulse" />,
+    ssr: false
+  }
+)
 
 /**
  * PDFマージページ
@@ -70,21 +115,35 @@ export default function PDFMergePage() {
           )}
 
           {/* Progress Display */}
-          <MergeProgress progress={state.progress} />
+          <Suspense fallback={<div className="h-12 bg-muted/50 rounded animate-pulse" />}>
+            <MergeProgress progress={state.progress} />
+          </Suspense>
 
           {/* Upload Area */}
-          <UploadArea
-            onFilesSelected={actions.addFiles}
-            disabled={state.isProcessing}
-          />
+          <Suspense fallback={
+            <div className="rounded-lg border-2 border-dashed border-border bg-card p-12 animate-pulse">
+              <div className="flex flex-col items-center justify-center">
+                <div className="h-12 w-12 bg-muted/50 rounded-full mb-4" />
+                <div className="h-4 bg-muted/50 rounded w-48 mb-2" />
+                <div className="h-3 bg-muted/50 rounded w-32" />
+              </div>
+            </div>
+          }>
+            <UploadArea
+              onFilesSelected={actions.addFiles}
+              disabled={state.isProcessing}
+            />
+          </Suspense>
 
           {/* File List */}
-          <FileList
-            files={state.files}
-            onRemove={actions.removeFile}
-            onReorder={actions.reorderFiles}
-            disabled={state.isProcessing}
-          />
+          <Suspense fallback={<div className="rounded-lg border border-border bg-card p-4 animate-pulse"><div className="h-24 bg-muted/50 rounded" /></div>}>
+            <FileList
+              files={state.files}
+              onRemove={actions.removeFile}
+              onReorder={actions.reorderFiles}
+              disabled={state.isProcessing}
+            />
+          </Suspense>
 
           {/* Completion Message */}
           {state.mergeResult && (
@@ -102,15 +161,17 @@ export default function PDFMergePage() {
 
       {/* Right Panel - Output Options */}
       <div className="hidden w-80 border-l border-border xl:block">
-        <OutputOptions
-          options={options}
-          onOptionsChange={setOptions}
-          onMerge={handleMerge}
-          onDownload={state.mergeResult ? handleDownload : undefined}
-          disabled={state.isProcessing}
-          mergeStatus={mergeStatus}
-          fileCount={state.files.length}
-        />
+        <Suspense fallback={<div className="w-80 h-full bg-muted/30 animate-pulse" />}>
+          <OutputOptions
+            options={options}
+            onOptionsChange={setOptions}
+            onMerge={handleMerge}
+            onDownload={state.mergeResult ? handleDownload : undefined}
+            disabled={state.isProcessing}
+            mergeStatus={mergeStatus}
+            fileCount={state.files.length}
+          />
+        </Suspense>
       </div>
     </div>
   )

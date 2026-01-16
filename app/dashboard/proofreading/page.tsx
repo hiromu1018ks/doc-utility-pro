@@ -1,16 +1,53 @@
 "use client"
 
-import { useState, useEffect, useRef, useTransition } from "react"
+import { useState, useEffect, useRef, useTransition, Suspense } from "react"
 import Settings from 'lucide-react/dist/esm/icons/settings'
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { TextInput } from "@/components/proofreading/text-input"
-import { OptionsPanel } from "@/components/proofreading/options-panel"
-import { DiffViewer } from "@/components/proofreading/diff-viewer"
-import { StreamingIndicator } from "@/components/proofreading/streaming-indicator"
-import { MobileOptionsDrawer } from "@/components/proofreading/mobile-options-drawer"
+import dynamic from 'next/dynamic'
 import { ProofreadingOptions, ProofreadingResult, DEFAULT_PROOFREADING_OPTIONS } from "@/types"
 import { MAX_TEXT_LENGTH } from "@/lib/constants"
+
+// Dynamic imports for better bundle splitting and code splitting
+const OptionsPanel = dynamic(
+  () => import('@/components/proofreading/options-panel').then(mod => ({ default: mod.OptionsPanel })),
+  {
+    loading: () => (
+      <div className="w-80 h-full bg-muted/30 animate-pulse flex items-center justify-center">
+        <div className="text-sm text-muted-foreground">読み込み中...</div>
+      </div>
+    ),
+    ssr: false
+  }
+)
+
+const DiffViewer = dynamic(
+  () => import('@/components/proofreading/diff-viewer').then(mod => ({ default: mod.DiffViewer })),
+  {
+    loading: () => (
+      <div className="rounded-lg border border-border bg-card p-4 shadow-sm animate-pulse">
+        <div className="h-96 bg-muted/50 rounded" />
+      </div>
+    ),
+    ssr: false
+  }
+)
+
+const StreamingIndicator = dynamic(
+  () => import('@/components/proofreading/streaming-indicator').then(mod => ({ default: mod.StreamingIndicator })),
+  {
+    loading: () => <div className="h-12 bg-muted/50 rounded animate-pulse" />,
+    ssr: false
+  }
+)
+
+const MobileOptionsDrawer = dynamic(
+  () => import('@/components/proofreading/mobile-options-drawer').then(mod => ({ default: mod.MobileOptionsDrawer })),
+  {
+    ssr: false
+  }
+)
 
 // Hoisted RegExp for better performance (created once, reused)
 const WORD_SPLIT_REGEX = /\s+/
@@ -301,10 +338,12 @@ export default function ProofreadingPage() {
           </div>
 
           {/* ストリーミングインジケーター */}
-          <StreamingIndicator
-            isActive={isStreaming}
-            progress={correctedText.length}
-          />
+          <Suspense fallback={<div className="h-12 bg-muted/50 rounded animate-pulse" />}>
+            <StreamingIndicator
+              isActive={isStreaming}
+              progress={correctedText.length}
+            />
+          </Suspense>
 
           {/* 警告表示 */}
           {warning && (
@@ -334,11 +373,13 @@ export default function ProofreadingPage() {
                   新しい校正
                 </button>
               </div>
-              <DiffViewer
-                originalText={inputText}
-                correctedText={correctedText}
-                changes={result?.changes || []}
-              />
+              <Suspense fallback={<div className="h-96 bg-muted/50 rounded animate-pulse" />}>
+                <DiffViewer
+                  originalText={inputText}
+                  correctedText={correctedText}
+                  changes={result?.changes || []}
+                />
+              </Suspense>
             </div>
           )}
 
@@ -359,15 +400,17 @@ export default function ProofreadingPage() {
 
       {/* 右パネル - オプション（デスクトップ） */}
       <div className="hidden w-80 border-l border-border bg-muted/30 xl:block">
-        <OptionsPanel
-          options={options}
-          onOptionsChange={setOptions}
-          onProofread={handleProofread}
-          isStreaming={isStreaming}
-          result={result}
-          correctedText={correctedText}
-          canProofread={inputText.trim().length > 0}
-        />
+        <Suspense fallback={<div className="w-80 h-full bg-muted/30 animate-pulse flex items-center justify-center"><div className="text-sm text-muted-foreground">読み込み中...</div></div>}>
+          <OptionsPanel
+            options={options}
+            onOptionsChange={setOptions}
+            onProofread={handleProofread}
+            isStreaming={isStreaming}
+            result={result}
+            correctedText={correctedText}
+            canProofread={inputText.trim().length > 0}
+          />
+        </Suspense>
       </div>
 
       {/* モバイル用オプションドロワー */}

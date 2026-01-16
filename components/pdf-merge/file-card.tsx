@@ -13,6 +13,11 @@ import type { FileUpload } from '@/types'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 
+// Hoisted icon components to avoid recreation on every render
+const PDF_ICON = <FileText className="h-5 w-5 text-red-500" />
+const DOCX_ICON = <File className="h-5 w-5 text-blue-500" />
+const DEFAULT_ICON = <FileText className="h-5 w-5 text-gray-500" />
+
 interface FileCardProps {
   file: FileUpload
   onRemove?: (id: string) => void
@@ -21,6 +26,20 @@ interface FileCardProps {
   id: string
   /** ドラッグ可能かどうか */
   draggable?: boolean
+}
+
+/**
+ * Get file icon based on file type (hoisted for performance)
+ */
+function getFileIcon(type: string) {
+  switch (type) {
+    case 'pdf':
+      return PDF_ICON
+    case 'docx':
+      return DOCX_ICON
+    default:
+      return DEFAULT_ICON
+  }
 }
 
 /**
@@ -52,17 +71,6 @@ export const FileCard = memo(function FileCard({
     opacity: isDragging ? 0.5 : 1,
   }
 
-  const getFileIcon = () => {
-    switch (file.type) {
-      case 'pdf':
-        return <FileText className="h-5 w-5 text-red-500" />
-      case 'docx':
-        return <File className="h-5 w-5 text-blue-500" />
-      default:
-        return <FileText className="h-5 w-5 text-gray-500" />
-    }
-  }
-
   return (
     <div
       ref={setNodeRef}
@@ -86,7 +94,7 @@ export const FileCard = memo(function FileCard({
       )}
 
       {/* File Icon */}
-      {getFileIcon()}
+      {getFileIcon(file.type)}
 
       {/* File Info */}
       <div className="flex-1 min-w-0">

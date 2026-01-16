@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useCallback } from "react"
 import { Sidebar } from "@/components/dashboard/sidebar"
 import { Header } from "@/components/dashboard/header"
 import { usePathname } from "next/navigation"
@@ -31,6 +31,11 @@ export default function DashboardLayout({
   // Memoize title calculation to avoid recreation on every render
   const title = useMemo(() => getPageTitle(pathname || "/"), [pathname])
 
+  // Memoize handlers to prevent unnecessary re-renders of child components
+  const handleMenuClick = useCallback(() => setSidebarOpen(true), [])
+  const handleSidebarClose = useCallback(() => setSidebarOpen(false), [])
+  const handleBackdropClick = useCallback(() => setSidebarOpen(false), [])
+
   return (
     <div className="flex h-screen overflow-hidden bg-background">
       {/* Sidebar - Desktop */}
@@ -43,12 +48,12 @@ export default function DashboardLayout({
         <>
           <div
             className="fixed inset-0 z-40 bg-black/50 lg:hidden"
-            onClick={() => setSidebarOpen(false)}
+            onClick={handleBackdropClick}
           />
           <div className="fixed inset-y-0 left-0 z-50 lg:hidden">
             <Sidebar
               currentPath={pathname || "/"}
-              onClose={() => setSidebarOpen(false)}
+              onClose={handleSidebarClose}
             />
           </div>
         </>
@@ -56,7 +61,7 @@ export default function DashboardLayout({
 
       {/* Main Content */}
       <div className="flex flex-1 flex-col overflow-hidden">
-        <Header title={title} onMenuClick={() => setSidebarOpen(true)} />
+        <Header title={title} onMenuClick={handleMenuClick} />
         <main className="flex-1 overflow-auto">{children}</main>
       </div>
     </div>

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef, useMemo } from "react"
 import { Button } from "@/components/ui/button"
 import { Switch } from "@/components/ui/switch"
 import { Label } from "@/components/ui/label"
@@ -50,7 +50,19 @@ export function OptionsPanel({
     onOptionsChange({ ...options, [key]: !options[key] })
   }
 
-  const hasEnabledOptions = Object.values(options).some(Boolean)
+  // Memoize computed values to avoid unnecessary recalculations
+  const hasEnabledOptions = useMemo(
+    () => Object.values(options).some(Boolean),
+    [options]
+  )
+
+  // Memoize categories with changes to avoid filtering on every render
+  const categoriesWithChanges = useMemo(
+    () => PROOFREADING_OPTIONS.filter(
+      (option) => (result?.summary?.changesByCategory?.[option] ?? 0) > 0
+    ),
+    [result]
+  )
 
   const handleCopy = async () => {
     if (!correctedText) return
@@ -228,26 +240,23 @@ export function OptionsPanel({
               </div>
 
               {/* カテゴリ別の変更数 */}
-              {PROOFREADING_OPTIONS.some(
-                (option) => result.summary.changesByCategory[option] > 0
-              ) && (
+              {categoriesWithChanges.length > 0 && (
                 <div className="space-y-1">
                   <span className="text-xs text-muted-foreground">カテゴリ別</span>
-                  {PROOFREADING_OPTIONS.map(
-                    (category) =>
-                      result.summary.changesByCategory[category] > 0 && (
-                        <div
-                          key={category}
-                          className="flex items-center justify-between rounded-lg bg-card px-3 py-2 border border-border"
-                        >
-                          <span className="text-xs text-foreground">
-                            {getCategoryLabel(category)}
-                          </span>
-                          <Badge variant="secondary" className="text-xs">
-                            {result.summary.changesByCategory[category]}件
-                          </Badge>
-                        </div>
-                      )
+                  {categoriesWithChanges.map(
+                    (category) => (
+                      <div
+                        key={category}
+                        className="flex items-center justify-between rounded-lg bg-card px-3 py-2 border border-border"
+                      >
+                        <span className="text-xs text-foreground">
+                          {getCategoryLabel(category)}
+                        </span>
+                        <Badge variant="secondary" className="text-xs">
+                          {(result?.summary?.changesByCategory?.[category] ?? 0)}件
+                        </Badge>
+                      </div>
+                    )
                   )}
                 </div>
               )}
