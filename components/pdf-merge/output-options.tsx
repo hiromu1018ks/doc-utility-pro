@@ -1,30 +1,62 @@
-"use client"
+'use client'
 
-import { Separator } from "@/components/ui/separator"
-import { Label } from "@/components/ui/label"
-import { Switch } from "@/components/ui/switch"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Select } from "@/components/ui/select"
-import { Button } from "@/components/ui/button"
-import { useState } from "react"
+import { memo } from 'react'
+import { Separator } from '@/components/ui/separator'
+import { Label } from '@/components/ui/label'
+import { Switch } from '@/components/ui/switch'
+import { Button } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
+import type { PdfMergeOptions, MergeStatus } from '@/types'
+import { DEFAULT_PDF_MERGE_OPTIONS } from '@/types'
+import Loader2 from 'lucide-react/dist/esm/icons/loader-2'
+import Download from 'lucide-react/dist/esm/icons/download'
 
-export function OutputOptions() {
-  const [options, setOptions] = useState({
-    keepFilename: true,
-    createBookmarks: true,
-    imageQuality: "high",
-    optimize: false,
-  })
+interface OutputOptionsProps {
+  options: PdfMergeOptions
+  onOptionsChange: (options: PdfMergeOptions) => void
+  onMerge: () => void
+  onDownload?: () => void
+  disabled?: boolean
+  mergeStatus?: MergeStatus
+  fileCount?: number
+  className?: string
+}
+
+/**
+ * 出力オプションコンポーネント
+ * 親コンポーネントから状態を受信
+ */
+export const OutputOptions = memo(function OutputOptions({
+  options,
+  onOptionsChange,
+  onMerge,
+  onDownload,
+  disabled = false,
+  mergeStatus = 'idle',
+  fileCount = 0,
+  className,
+}: OutputOptionsProps) {
+  const updateOption = <K extends keyof PdfMergeOptions>(
+    key: K,
+    value: PdfMergeOptions[K]
+  ) => {
+    onOptionsChange({ ...options, [key]: value })
+  }
+
+  const isProcessing = mergeStatus === 'processing'
+  const isCompleted = mergeStatus === 'completed'
+
+  const canMerge = !disabled && !isProcessing && fileCount >= 2
 
   return (
-    <div className="flex h-full flex-col bg-muted/30">
+    <div className={cn('flex h-full flex-col bg-muted/30', className)}>
       <div className="p-4">
         <h2 className="text-sm font-semibold text-foreground">出力オプション</h2>
       </div>
 
       <Separator />
 
-      <div className="flex-1 space-y-6 p-4">
+      <div className="flex-1 space-y-6 p-4 overflow-auto">
         {/* 結合順序 */}
         <div className="space-y-3">
           <h3 className="text-xs font-medium text-muted-foreground uppercase">
@@ -35,7 +67,9 @@ export function OutputOptions() {
               <input
                 type="radio"
                 name="order"
-                defaultChecked
+                checked={options.order === 'original'}
+                onChange={() => updateOption('order', 'original')}
+                disabled={disabled || isProcessing}
                 className="h-4 w-4 border-input text-primary focus:ring-primary"
               />
               <span className="text-foreground">元の順序</span>
@@ -44,6 +78,9 @@ export function OutputOptions() {
               <input
                 type="radio"
                 name="order"
+                checked={options.order === 'filename'}
+                onChange={() => updateOption('order', 'filename')}
+                disabled={disabled || isProcessing}
                 className="h-4 w-4 border-input text-primary focus:ring-primary"
               />
               <span className="text-foreground">ファイル名順</span>
@@ -66,9 +103,8 @@ export function OutputOptions() {
           <Switch
             id="keep-filename"
             checked={options.keepFilename}
-            onClick={() =>
-              setOptions({ ...options, keepFilename: !options.keepFilename })
-            }
+            onClick={() => updateOption('keepFilename', !options.keepFilename)}
+            disabled={disabled || isProcessing}
           />
         </div>
 
@@ -82,15 +118,13 @@ export function OutputOptions() {
               ファイル名を目次として追加します
             </p>
           </div>
-          <Checkbox
+          <Switch
             id="bookmarks"
             checked={options.createBookmarks}
             onClick={() =>
-              setOptions({
-                ...options,
-                createBookmarks: !options.createBookmarks,
-              })
+              updateOption('createBookmarks', !options.createBookmarks)
             }
+            disabled={disabled || isProcessing}
           />
         </div>
 
@@ -101,17 +135,19 @@ export function OutputOptions() {
           <Label htmlFor="quality" className="text-sm text-foreground">
             画像品質
           </Label>
-          <Select
+          <select
             id="quality"
             value={options.imageQuality}
             onChange={(e) =>
-              setOptions({ ...options, imageQuality: e.target.value })
+              updateOption('imageQuality', e.target.value as PdfMergeOptions['imageQuality'])
             }
+            disabled={disabled || isProcessing}
+            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground focus:ring-2 focus:ring-ring focus:ring-offset-2"
           >
             <option value="high">高</option>
             <option value="medium">中</option>
             <option value="low">低</option>
-          </Select>
+          </select>
         </div>
 
         <Separator />
@@ -129,9 +165,8 @@ export function OutputOptions() {
           <Switch
             id="optimize"
             checked={options.optimize}
-            onClick={() =>
-              setOptions({ ...options, optimize: !options.optimize })
-            }
+            onClick={() => updateOption('optimize', !options.optimize)}
+            disabled={disabled || isProcessing}
           />
         </div>
       </div>
@@ -139,11 +174,40 @@ export function OutputOptions() {
       <Separator />
 
       {/* Action Button */}
-      <div className="p-4">
-        <Button className="w-full" size="lg">
-          処理を実行してダウンロード
-        </Button>
+      <div className="p-4 space-y-2">
+        {isCompleted && onDownload ? (
+          <Button
+            className="w-full"
+            size="lg"
+            onClick={onDownload}
+            variant="default"
+          >
+            <Download className="h-4 w-4 mr-2" />
+            ダウンロード
+          </Button>
+        ) : (
+          <Button
+            className="w-full"
+            size="lg"
+            onClick={onMerge}
+            disabled={!canMerge}
+          >
+            {isProcessing ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                処理中...
+              </>
+            ) : (
+              <>処理を実行してダウンロード</>
+            )}
+          </Button>
+        )}
+        {fileCount > 0 && fileCount < 2 && (
+          <p className="text-xs text-muted-foreground text-center">
+            結合には2つ以上のファイルが必要です
+          </p>
+        )}
       </div>
     </div>
   )
-}
+})
