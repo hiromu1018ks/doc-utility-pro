@@ -258,3 +258,61 @@ export interface HistoryEntry {
   timestamp: number
   action: string
 }
+
+// ============================================================================
+// PDFページ番号挿入機能の型定義
+// ============================================================================
+
+/** ページ番号の配置位置（9箇所） */
+export type NumberPosition =
+  | 'top-left'
+  | 'top-center'
+  | 'top-right'
+  | 'middle-left'
+  | 'middle-center'
+  | 'middle-right'
+  | 'bottom-left'
+  | 'bottom-center'
+  | 'bottom-right'
+
+/** 奇数・偶数ページで別の位置を使用する設定 */
+export interface OddEvenPosition {
+  odd: NumberPosition   // 奇数ページの位置
+  even: NumberPosition  // 偶数ページの位置
+}
+
+/** ページ番号挿入オプション */
+export interface PdfNumberingOptions {
+  /** 配置位置（単一または奇数・偶数別） */
+  position: NumberPosition | OddEvenPosition
+  /** 開始番号（デフォルト: 1） */
+  startNumber: number
+  /** 開始ページ（1ベース、カバーページをスキップする場合など） */
+  startFromPage: number
+  /** フォントサイズ (pt単位) */
+  fontSize: number
+  /** 余白 (PDFユニット、1/72インチ) */
+  marginX: number
+  marginY: number
+  /** フォントカラー (16進数 #RRGGBB) */
+  fontColor: string
+}
+
+/** デフォルトのページ番号挿入オプション */
+export const DEFAULT_PDF_NUMBERING_OPTIONS: PdfNumberingOptions = {
+  position: 'bottom-right',
+  startNumber: 1,
+  startFromPage: 1,
+  fontSize: 12,
+  marginX: 50,
+  marginY: 30,
+  fontColor: '#000000',
+} as const
+
+/** ページ番号挿入結果 */
+export interface NumberingResult {
+  blob: Blob
+  filename: string
+  size: number
+  pages: number
+}
