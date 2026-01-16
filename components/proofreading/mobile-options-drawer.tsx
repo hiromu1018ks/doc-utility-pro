@@ -1,7 +1,7 @@
 "use client"
 
 import { memo } from "react"
-import { X } from "lucide-react"
+import X from 'lucide-react/dist/esm/icons/x'
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 

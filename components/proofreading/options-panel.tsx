@@ -7,7 +7,11 @@ import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
 import { Badge } from "@/components/ui/badge"
 import { ProofreadingOptions, ProofreadingResult, ProofreadingOption, PROOFREADING_OPTIONS } from "@/types"
-import { Loader2, Copy, CheckCircle2, Check, AlertCircle } from "lucide-react"
+import Loader2 from 'lucide-react/dist/esm/icons/loader-2'
+import Copy from 'lucide-react/dist/esm/icons/copy'
+import CheckCircle2 from 'lucide-react/dist/esm/icons/check-circle-2'
+import Check from 'lucide-react/dist/esm/icons/check'
+import AlertCircle from 'lucide-react/dist/esm/icons/alert-circle'
 import { cn } from "@/lib/utils"
 
 interface OptionsPanelProps {

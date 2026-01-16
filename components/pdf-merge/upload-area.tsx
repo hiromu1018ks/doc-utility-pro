@@ -1,6 +1,6 @@
 "use client"
 
-import { Upload } from "lucide-react"
+import Upload from 'lucide-react/dist/esm/icons/upload'
 import { cn } from "@/lib/utils"
 
 interface UploadAreaProps {

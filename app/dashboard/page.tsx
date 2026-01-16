@@ -1,12 +1,10 @@
 "use client"
 
-import {
-  FileText,
-  CheckCircle,
-  Layout,
-  HardDrive,
-  ArrowRight,
-} from "lucide-react"
+import FileText from 'lucide-react/dist/esm/icons/file-text'
+import CheckCircle from 'lucide-react/dist/esm/icons/check-circle'
+import Layout from 'lucide-react/dist/esm/icons/layout'
+import HardDrive from 'lucide-react/dist/esm/icons/hard-drive'
+import ArrowRight from 'lucide-react/dist/esm/icons/arrow-right'
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"

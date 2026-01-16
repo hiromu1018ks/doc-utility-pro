@@ -5,6 +5,15 @@ import { MAX_TEXT_LENGTH } from '@/lib/constants'
 // Vercel AI SDKの設定
 export const maxDuration = 60
 
+// Static instruction mapping moved outside function for better performance
+const OPTION_INSTRUCTIONS: Record<string, string> = {
+  grammar: '・文法や語法の間違いを検出・修正してください\n・明白な文法ミスは必ず修正してください',
+  style: '・文体やスタイルを改善し、一貫性を高めてください\n・読みにくい長文は適宜分割し、接続詞を整理して読みやすくしてください\n・公文書として適切な文体に整えてください',
+  spelling: '・タイプミスや誤字脱字を修正してください\n・表記ゆれ（全角半角、漢字の開きなど）を統一してください\n・句読点（「、。」）を適切に補ってください',
+  clarity: '・文章の明確性を高め、わかりやすい表現に直してください\n・重複を避け、簡潔な表現にまとめてください\n・曖昧な表現を明確にしてください',
+  tone: '・公文書・ビジネス文書として適切なトーン（丁寧語・ですます調）に調整してください\n・一貫した敬語表現を使用してください\n・口語的な表現（〜だなー、〜だね、〜じゃんなど）を書き言葉に直してください\n・語尾を適切に整えてください',
+}
+
 /**
  * 文章校正API
  * POST /api/proofread
@@ -116,16 +125,9 @@ export async function POST(req: Request) {
  * 有効なオプションに基づいてシステムプロンプトを構築
  */
 function buildSystemPrompt(enabledOptions: string[]): string {
-  const optionInstructions: Record<string, string> = {
-    grammar: '・文法や語法の間違いを検出・修正してください\n・明白な文法ミスは必ず修正してください',
-    style: '・文体やスタイルを改善し、一貫性を高めてください\n・読みにくい長文は適宜分割し、接続詞を整理して読みやすくしてください\n・公文書として適切な文体に整えてください',
-    spelling: '・タイプミスや誤字脱字を修正してください\n・表記ゆれ（全角半角、漢字の開きなど）を統一してください\n・句読点（「、。」）を適切に補ってください',
-    clarity: '・文章の明確性を高め、わかりやすい表現に直してください\n・重複を避け、簡潔な表現にまとめてください\n・曖昧な表現を明確にしてください',
-    tone: '・公文書・ビジネス文書として適切なトーン（丁寧語・ですます調）に調整してください\n・一貫した敬語表現を使用してください\n・口語的な表現（〜だなー、〜だね、〜じゃんなど）を書き言葉に直してください\n・語尾を適切に整えてください',
-  }
-
+  // Use the static OPTION_INSTRUCTIONS constant instead of recreating it
   const instructions = enabledOptions
-    .map((opt) => optionInstructions[opt])
+    .map((opt) => OPTION_INSTRUCTIONS[opt])
     .filter(Boolean)
     .join('\n')
 

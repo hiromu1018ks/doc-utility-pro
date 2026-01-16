@@ -1,16 +1,14 @@
 "use client"
 
-import {
-  Home,
-  Sparkles,
-  Files,
-  Scissors,
-  Type,
-  Archive,
-  X,
-} from "lucide-react"
+import { memo } from "react"
+import Home from 'lucide-react/dist/esm/icons/home'
+import Sparkles from 'lucide-react/dist/esm/icons/sparkles'
+import Files from 'lucide-react/dist/esm/icons/files'
+import Scissors from 'lucide-react/dist/esm/icons/scissors'
+import Type from 'lucide-react/dist/esm/icons/type'
+import Archive from 'lucide-react/dist/esm/icons/archive'
+import X from 'lucide-react/dist/esm/icons/x'
 import Link from "next/link"
-import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { NavItem } from "@/types"
 import { Button } from "@/components/ui/button"
@@ -39,8 +37,10 @@ interface SidebarProps {
   onClose?: () => void
 }
 
-export function Sidebar({ currentPath = "/", onClose }: SidebarProps) {
-  const pathname = usePathname() || currentPath
+export const Sidebar = memo(function Sidebar({ currentPath = "/", onClose }: SidebarProps) {
+  // Use currentPath from props instead of calling usePathname() again
+  // This prevents redundant subscriptions and improves performance
+  const pathname = currentPath
 
   return (
     <aside className="flex h-full w-64 flex-col bg-sidebar text-sidebar-foreground">
@@ -107,4 +107,4 @@ export function Sidebar({ currentPath = "/", onClose }: SidebarProps) {
       </div>
     </aside>
   )
-}
+})

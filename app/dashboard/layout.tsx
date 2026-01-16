@@ -1,9 +1,24 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useMemo } from "react"
 import { Sidebar } from "@/components/dashboard/sidebar"
 import { Header } from "@/components/dashboard/header"
 import { usePathname } from "next/navigation"
+
+// Page title mapping moved outside component for better performance
+const PAGE_TITLES: Record<string, string> = {
+  "/dashboard": "ダッシュボード",
+}
+
+function getPageTitle(pathname: string): string {
+  if (pathname === "/dashboard") return PAGE_TITLES[pathname]
+  if (pathname?.includes("pdf-merge")) return "PDFファイルの結合 - ワークスペース"
+  if (pathname?.includes("pdf-split")) return "PDF分割"
+  if (pathname?.includes("proofreading")) return "文章校正AI"
+  if (pathname?.includes("page-numbers")) return "ページ番号挿入"
+  if (pathname?.includes("compress")) return "圧縮・軽量化"
+  return "ダッシュボード"
+}
 
 export default function DashboardLayout({
   children,
@@ -13,16 +28,8 @@ export default function DashboardLayout({
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const pathname = usePathname()
 
-  // Get page title based on path
-  const getPageTitle = () => {
-    if (pathname === "/dashboard") return "ダッシュボード"
-    if (pathname?.includes("pdf-merge")) return "PDFファイルの結合 - ワークスペース"
-    if (pathname?.includes("pdf-split")) return "PDF分割"
-    if (pathname?.includes("proofreading")) return "文章校正AI"
-    if (pathname?.includes("page-numbers")) return "ページ番号挿入"
-    if (pathname?.includes("compress")) return "圧縮・軽量化"
-    return "ダッシュボード"
-  }
+  // Memoize title calculation to avoid recreation on every render
+  const title = useMemo(() => getPageTitle(pathname || "/"), [pathname])
 
   return (
     <div className="flex h-screen overflow-hidden bg-background">
@@ -49,7 +56,7 @@ export default function DashboardLayout({
 
       {/* Main Content */}
       <div className="flex flex-1 flex-col overflow-hidden">
-        <Header title={getPageTitle()} onMenuClick={() => setSidebarOpen(true)} />
+        <Header title={title} onMenuClick={() => setSidebarOpen(true)} />
         <main className="flex-1 overflow-auto">{children}</main>
       </div>
     </div>

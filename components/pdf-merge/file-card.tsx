@@ -1,6 +1,9 @@
 "use client"
 
-import { FileText, File, X, MoreHorizontal } from "lucide-react"
+import FileText from 'lucide-react/dist/esm/icons/file-text'
+import File from 'lucide-react/dist/esm/icons/file'
+import X from 'lucide-react/dist/esm/icons/x'
+import MoreHorizontal from 'lucide-react/dist/esm/icons/more-horizontal'
 import { cn } from "@/lib/utils"
 import { FileUpload } from "@/types"
 import { Button } from "@/components/ui/button"

@@ -1,6 +1,9 @@
 "use client"
 
-import { Search, Bell, Menu } from "lucide-react"
+import { memo } from "react"
+import Search from 'lucide-react/dist/esm/icons/search'
+import Bell from 'lucide-react/dist/esm/icons/bell'
+import Menu from 'lucide-react/dist/esm/icons/menu'
 import { Button } from "@/components/ui/button"
 
 interface HeaderProps {
@@ -8,7 +11,7 @@ interface HeaderProps {
   onMenuClick?: () => void
 }
 
-export function Header({ title = "ダッシュボード", onMenuClick }: HeaderProps) {
+export const Header = memo(function Header({ title = "ダッシュボード", onMenuClick }: HeaderProps) {
   return (
     <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b border-border bg-background px-6">
       <Button
@@ -48,4 +51,4 @@ export function Header({ title = "ダッシュボード", onMenuClick }: HeaderP
       </div>
     </header>
   )
-}
+})

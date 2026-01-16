@@ -1,7 +1,7 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
-import { Settings } from "lucide-react"
+import { useState, useEffect, useRef, useTransition } from "react"
+import Settings from 'lucide-react/dist/esm/icons/settings'
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { TextInput } from "@/components/proofreading/text-input"
@@ -12,6 +12,9 @@ import { MobileOptionsDrawer } from "@/components/proofreading/mobile-options-dr
 import { ProofreadingOptions, ProofreadingResult, DEFAULT_PROOFREADING_OPTIONS } from "@/types"
 import { MAX_TEXT_LENGTH } from "@/lib/constants"
 
+// Hoisted RegExp for better performance (created once, reused)
+const WORD_SPLIT_REGEX = /\s+/
+
 export default function ProofreadingPage() {
   const [inputText, setInputText] = useState("")
   const [options, setOptions] = useState<ProofreadingOptions>(DEFAULT_PROOFREADING_OPTIONS)
@@ -21,6 +24,7 @@ export default function ProofreadingPage() {
   const [error, setError] = useState<string | null>(null)
   const [warning, setWarning] = useState<string | null>(null)
   const [isMobileOptionsOpen, setIsMobileOptionsOpen] = useState(false)
+  const [, startTransition] = useTransition()
 
   // AbortController for cancelling requests
   const abortControllerRef = useRef<AbortController | null>(null)
@@ -49,7 +53,7 @@ export default function ProofreadingPage() {
             clarity: 0,
             tone: 0,
           },
-          wordCount: inputText.trim() ? inputText.trim().split(/\s+/).length : 0,
+          wordCount: inputText.trim() ? inputText.trim().split(WORD_SPLIT_REGEX).length : 0,
           characterCount: inputText.length,
         },
       }
@@ -223,7 +227,8 @@ export default function ProofreadingPage() {
         }
 
         if (accumulatedText.length > 0) {
-          setShowResult(true)
+          // Use transition for non-urgent UI update
+          startTransition(() => setShowResult(true))
         } else {
           console.error('[EMPTY_RESULT] デバッグログ:', debugLogs)
           setError('校正結果が空です。コンソールログを確認してください。')
@@ -244,9 +249,8 @@ export default function ProofreadingPage() {
       }
     } catch (err) {
       // AbortErrorはサイレントに処理（ユーザーキャンセルまたはタイムアウト）
+      // タイムアウトの場合は既に setError() が呼ばれているため、ここでは何もしない
       if (err instanceof Error && err.name === 'AbortError') {
-        // タイムアウトで既にエラーが設定されている場合は何もしない
-        if (error) return
         return
       }
       const errorMessage = err instanceof Error ? err.message : "エラーが発生しました"
