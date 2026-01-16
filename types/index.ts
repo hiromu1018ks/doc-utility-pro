@@ -148,3 +148,66 @@ export type ValidationError =
 export type ValidationResult =
   | { success: true }
   | { success: false; error: ValidationError; message: string }
+
+// ============================================================================
+// PDF分割機能の型定義
+// ============================================================================
+
+/** 分割方法 */
+export type SplitMethod = 'ranges' | 'equalParts' | 'equalPages'
+
+/** ページ範囲（1ページ始まり、 inclusive） */
+export interface PageRange {
+  start: number  // 開始ページ（1以上）
+  end: number    // 終了ページ（start以上）
+}
+
+/** ページ範囲のバリデーション結果 */
+export interface RangeValidationResult {
+  isValid: boolean
+  ranges: PageRange[]
+  errors: RangeError[]
+  totalPages: number
+}
+
+/** ページ範囲エラー */
+export interface RangeError {
+  input: string
+  message: string
+}
+
+/** PDF分割オプション */
+export interface PdfSplitOptions {
+  /** 分割方法 */
+  method: SplitMethod
+  /** ページ範囲指定（method='ranges'時） "1-3,5,8-10" 形式 */
+  ranges: string
+  /** 分割数（method='equalParts'時） */
+  partsCount?: number
+  /** ページ数ごとに分割（method='equalPages'時） */
+  pagesPerSplit?: number
+}
+
+/** デフォルトの分割オプション */
+export const DEFAULT_PDF_SPLIT_OPTIONS: PdfSplitOptions = {
+  method: 'ranges',
+  ranges: '',
+} as const
+
+/** 分割結果（単一） */
+export interface SplitResult {
+  blob: Blob
+  filename: string
+  size: number
+  pages: number
+  pageRange: string  // e.g. "1-3", "4", "5-7"
+  pageNumbers: number[]  // 含まれるページ番号（1ページ始まり）
+}
+
+/** 分割処理の全体結果 */
+export interface SplitBatchResult {
+  splits: SplitResult[]
+  zipBlob?: Blob  // ZIPファイル（全分割を含む）
+  totalPages: number
+  totalSplits: number
+}
