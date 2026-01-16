@@ -211,3 +211,50 @@ export interface SplitBatchResult {
   totalPages: number
   totalSplits: number
 }
+
+// ============================================================================
+// PDFページ管理機能の型定義
+// ============================================================================
+
+/** ページ回転角度 */
+export type RotationDegrees = 0 | 90 | 180 | 270
+
+/** PDFページ状態 */
+export interface PdfPage {
+  id: string                        // ユニーク識別子
+  originalIndex: number             // 元PDF内の位置（0ベース）
+  pageNumber: number                // ページ番号（1ベース、表示用）
+  thumbnail: string | null          // サムネイル（Data URLまたはBlob URL）
+  rotation: RotationDegrees         // 現在の回転角度
+  selected: boolean                 // 選択状態（一括操作用）
+  dimensions?: {                    // ページサイズ
+    width: number
+    height: number
+  }
+}
+
+/** PDFページ管理オプション */
+export interface PdfPageManageOptions {
+  /** 元のファイル名を維持 */
+  keepFilename: boolean
+}
+
+/** デフォルトのページ管理オプション */
+export const DEFAULT_PDF_PAGE_MANAGE_OPTIONS: PdfPageManageOptions = {
+  keepFilename: true,
+} as const
+
+/** PDFページ管理結果 */
+export interface PdfPageManageResult {
+  blob: Blob
+  filename: string
+  size: number
+  pages: number
+}
+
+/** 履歴エントリ（Undo/Redo用） */
+export interface HistoryEntry {
+  pages: PdfPage[]
+  timestamp: number
+  action: string
+}

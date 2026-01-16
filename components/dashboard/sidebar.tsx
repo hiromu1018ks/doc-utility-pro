@@ -7,6 +7,7 @@ import Files from 'lucide-react/dist/esm/icons/files'
 import Scissors from 'lucide-react/dist/esm/icons/scissors'
 import Type from 'lucide-react/dist/esm/icons/type'
 import Archive from 'lucide-react/dist/esm/icons/archive'
+import Edit3 from 'lucide-react/dist/esm/icons/edit-3'
 import X from 'lucide-react/dist/esm/icons/x'
 import Link from "next/link"
 import { cn } from "@/lib/utils"
@@ -19,6 +20,7 @@ const navItems: NavItem[] = [
   { label: "文章校正AI", href: "/dashboard/proofreading", icon: "sparkles" },
   { label: "PDF結合", href: "/dashboard/pdf-merge", icon: "files" },
   { label: "PDF分割", href: "/dashboard/pdf-split", icon: "scissors" },
+  { label: "PDFページ管理", href: "/dashboard/pdf-pages", icon: "edit3" },
   { label: "ページ番号挿入", href: "/dashboard/page-numbers", icon: "type" },
   { label: "圧縮・軽量化", href: "/dashboard/compress", icon: "archive" },
 ]
@@ -28,6 +30,7 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   sparkles: Sparkles,
   files: Files,
   scissors: Scissors,
+  edit3: Edit3,
   type: Type,
   archive: Archive,
 }

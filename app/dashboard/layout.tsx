@@ -14,6 +14,7 @@ function getPageTitle(pathname: string): string {
   if (pathname === "/dashboard") return PAGE_TITLES[pathname]
   if (pathname?.includes("pdf-merge")) return "PDFファイルの結合 - ワークスペース"
   if (pathname?.includes("pdf-split")) return "PDF分割"
+  if (pathname?.includes("pdf-pages")) return "PDFページ管理"
   if (pathname?.includes("proofreading")) return "文章校正AI"
   if (pathname?.includes("page-numbers")) return "ページ番号挿入"
   if (pathname?.includes("compress")) return "圧縮・軽量化"
