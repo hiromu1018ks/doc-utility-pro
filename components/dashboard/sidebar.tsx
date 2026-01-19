@@ -22,7 +22,7 @@ const navItems: NavItem[] = [
   { label: "PDF分割", href: "/dashboard/pdf-split", icon: "scissors" },
   { label: "PDFページ管理", href: "/dashboard/pdf-pages", icon: "edit3" },
   { label: "ページ番号挿入", href: "/dashboard/page-numbers", icon: "type" },
-  { label: "圧縮・軽量化", href: "/dashboard/compress", icon: "archive" },
+  { label: "圧縮・軽量化", href: "/dashboard/pdf-compress", icon: "archive" },
 ]
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {

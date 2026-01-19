@@ -316,3 +316,94 @@ export interface NumberingResult {
   size: number
   pages: number
 }
+
+// ============================================================================
+// PDF圧縮機能の型定義
+// ============================================================================
+
+/** 圧縮プリセット */
+export type CompressionPreset = 'low' | 'medium' | 'high'
+
+/** 圧縮プリセット設定 */
+export interface CompressionPresetConfig {
+  quality: number
+  maxWidth: number
+  maxHeight: number
+  description: string
+}
+
+/** 圧縮プリセット情報（UI表示用） */
+export interface CompressionPresetInfo {
+  id: CompressionPreset
+  label: string
+  description: string
+  icon: React.ComponentType<{ className?: string }>
+}
+
+/** 圧縮プリセット設定マップ */
+export const COMPRESSION_PRESET_CONFIGS: Record<CompressionPreset, CompressionPresetConfig> = {
+  low: {
+    quality: 0.5,
+    maxWidth: 1280,
+    maxHeight: 1280,
+    description: '高圧縮・低画質',
+  },
+  medium: {
+    quality: 0.7,
+    maxWidth: 1920,
+    maxHeight: 1920,
+    description: '標準',
+  },
+  high: {
+    quality: 0.85,
+    maxWidth: 2560,
+    maxHeight: 2560,
+    description: '低圧縮・高画質',
+  },
+} as const
+
+/** PDF圧縮オプション */
+export interface PdfCompressionOptions {
+  /** 圧縮レベルプリセット */
+  preset: CompressionPreset
+  /** メタデータを削除 */
+  removeMetadata: boolean
+  /** 注釈を削除 */
+  removeAnnotations: boolean
+  /** グレースケールに変換（現在サポート外） */
+  convertToGrayscale: boolean
+}
+
+/** デフォルトのPDF圧縮オプション */
+export const DEFAULT_PDF_COMPRESSION_OPTIONS: PdfCompressionOptions = {
+  preset: 'medium',
+  removeMetadata: true,
+  removeAnnotations: false,
+  convertToGrayscale: false,
+} as const
+
+/** PDF圧縮結果 */
+export interface CompressionResult {
+  blob: Blob
+  filename: string
+  originalSize: number
+  compressedSize: number
+  reductionRate: number
+  pages: number
+}
+
+/** プリセット対応日本語ラベル */
+export const COMPRESSION_PRESET_LABELS: Record<CompressionPreset, string> = {
+  low: '高圧縮・低画質',
+  medium: '標準',
+  high: '低圧縮・高画質',
+} as const
+
+/** ローディングメッセージ定数 */
+export const COMPRESSION_LOADING_MESSAGES = {
+  INIT: 'PDFを読み込んでいます...',
+  ANALYZING: 'PDFを解析中...',
+  COMPRESSING: '画像を最適化中...',
+  SAVING: 'PDFを保存中...',
+  COMPLETED: '圧縮完了',
+} as const

@@ -42,7 +42,7 @@ const tools = [
   {
     title: "圧縮・軽量化",
     description: "ファイルサイズを最適化",
-    href: "/dashboard/compress",
+    href: "/dashboard/pdf-compress",
     icon: HardDrive,
     color: "bg-orange-500",
   },
