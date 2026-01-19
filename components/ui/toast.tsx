@@ -79,21 +79,27 @@ export const Toast = React.memo(function Toast({
     // durationがundefinedの場合は自動消去なし（手動のみ）
     if (notification.duration === undefined) return
 
+    let animationTimer: NodeJS.Timeout | undefined
+
     const timer = setTimeout(() => {
       setIsExiting(true)
       // アニメーション完了後に消去
-      setTimeout(() => {
+      animationTimer = setTimeout(() => {
         onDismiss?.(notification.id)
       }, 200)
     }, notification.duration)
 
-    return () => clearTimeout(timer)
+    return () => {
+      clearTimeout(timer)
+      if (animationTimer) clearTimeout(animationTimer)
+    }
   }, [notification.id, notification.duration, onDismiss])
 
   // 手動消去ハンドラ
   const handleDismiss = React.useCallback(() => {
     if (isExiting) return // すでに消去中なら何もしない
     setIsExiting(true)
+    // アニメーション完了後に消去
     setTimeout(() => {
       onDismiss?.(notification.id)
     }, 200)

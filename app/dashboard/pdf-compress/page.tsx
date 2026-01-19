@@ -55,8 +55,10 @@ export default function PDFCompressPage() {
   const [, { addActivity }] = useDashboardData()
   const [, { show }] = useNotifications()
 
-  // Track successful compression completion
+  // Track compression completion and errors (unified effect to prevent double renders)
   useEffect(() => {
+    const fileName = state.file?.name || 'PDFファイル'
+    // Success case
     if (state.compressionResult) {
       const reductionPercent = state.compressionResult.reductionRate
       addActivity('compress', state.compressionResult.filename, 'completed', {
@@ -69,18 +71,17 @@ export default function PDFCompressPage() {
       } else {
         show('info', '圧縮処理が完了しました', 'これ以上圧縮できませんでした')
       }
+      return
     }
-  }, [state.compressionResult, addActivity, show])
-
-  // Track compression errors
-  useEffect(() => {
+    // Error case
     if (state.error) {
-      addActivity('compress', state.file?.name || 'PDFファイル', 'failed', {
+      addActivity('compress', fileName, 'failed', {
         errorMessage: state.error,
       })
       show('error', '圧縮に失敗しました', state.error)
+      return
     }
-  }, [state.error, state.file, addActivity, show])
+  }, [state.compressionResult, state.error, state.file, addActivity, show])
 
   // 圧縮実行ハンドラ
   const handleCompress = async () => {

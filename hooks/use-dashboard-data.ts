@@ -6,7 +6,7 @@
 
 'use client'
 
-import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { useSession } from './use-session'
 import type { Activity, RecentActivity, DashboardStatistics, ActivityType } from '@/types'
 import {
@@ -191,17 +191,24 @@ export function useDashboardData(): [UseDashboardDataState, UseDashboardDataActi
     loadData()
   }, [loadData])
 
+  // loadDataの最新版をrefに保持（storageイベント用）
+  const loadDataRef = useRef(loadData)
+  useEffect(() => {
+    loadDataRef.current = loadData
+  }, [loadData])
+
   // クロスタブ同期のためにstorageイベントをリッスン
+  // 空の依存配列でイベントリスナーを1回だけ登録
   useEffect(() => {
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key?.includes('doc-utility-v1-activities') && e.newValue !== null) {
-        loadData()
+        loadDataRef.current()
       }
     }
 
     window.addEventListener('storage', handleStorageChange)
     return () => window.removeEventListener('storage', handleStorageChange)
-  }, [loadData])
+  }, []) // 空の依存配列 - 1回だけ実行
 
   // 最近のアクティビティ（最大10件）
   const recentActivities = useMemo(() => {

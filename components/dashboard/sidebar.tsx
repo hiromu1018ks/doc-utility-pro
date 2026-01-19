@@ -43,9 +43,17 @@ interface SidebarProps {
   onClose?: () => void
 }
 
-export const Sidebar = memo(function Sidebar({ currentPath = "/", onClose }: SidebarProps) {
+// セッションに依存する下部セクション（メモ化）
+const SidebarFooter = memo(function SidebarFooter({
+  currentPath,
+  onClose,
+}: {
+  currentPath: string
+  onClose?: () => void
+}) {
   const { session } = useSession()
   const isAdmin = session?.user?.role === 'ADMIN'
+  const userInitial = session?.user?.name?.charAt(0) || 'U'
 
   const handleLogout = async () => {
     try {
@@ -56,8 +64,72 @@ export const Sidebar = memo(function Sidebar({ currentPath = "/", onClose }: Sid
     }
   }
 
+  return (
+    <>
+      <Separator className="bg-sidebar-border" />
+
+      {/* User Section */}
+      <div className="p-4 space-y-2">
+        <div className="flex items-center gap-3 rounded-lg bg-sidebar-accent p-3">
+          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary">
+            <span className="text-sm font-medium text-primary-foreground">{userInitial}</span>
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium text-sidebar-accent-foreground truncate">
+              {session?.user?.name || '読み込み中...'}
+            </p>
+            <p className="text-xs text-muted-foreground truncate">
+              {session?.user?.email || ''}
+            </p>
+          </div>
+        </div>
+
+        {/* Logout Button */}
+        <Button
+          variant="ghost"
+          className="w-full justify-start text-muted-foreground hover:text-sidebar-accent-foreground"
+          onClick={handleLogout}
+        >
+          <LogOut className="mr-2 h-4 w-4" />
+          ログアウト
+        </Button>
+      </div>
+    </>
+  )
+})
+
+// 管理者用リンク（メモ化）
+const AdminLink = memo(function AdminLink({
+  currentPath,
+  onClose,
+}: {
+  currentPath: string
+  onClose?: () => void
+}) {
+  const { session } = useSession()
+  const isAdmin = session?.user?.role === 'ADMIN'
+
+  if (!isAdmin) return null
+
+  return (
+    <Link
+      href="/dashboard/users"
+      onClick={onClose}
+      className={cn(
+        "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+        currentPath === "/dashboard/users"
+          ? "bg-primary text-primary-foreground"
+          : "text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+      )}
+    >
+      <Users className="h-5 w-5" />
+      ユーザー管理
+    </Link>
+  )
+})
+
+export const Sidebar = memo(function Sidebar({ currentPath = "/", onClose }: SidebarProps) {
   const pathname = currentPath
-  const userInitial = session?.user?.name?.charAt(0) || 'U'
 
   return (
     <aside className="flex h-full w-64 flex-col bg-sidebar text-sidebar-foreground">
@@ -108,51 +180,11 @@ export const Sidebar = memo(function Sidebar({ currentPath = "/", onClose }: Sid
         })}
 
         {/* 管理者用：ユーザー管理 */}
-        {isAdmin && (
-          <Link
-            href="/dashboard/users"
-            onClick={onClose}
-            className={cn(
-              "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
-              pathname === "/dashboard/users"
-                ? "bg-primary text-primary-foreground"
-                : "text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-            )}
-          >
-            <Users className="h-5 w-5" />
-            ユーザー管理
-          </Link>
-        )}
+        <AdminLink currentPath={pathname} onClose={onClose} />
       </nav>
 
-      <Separator className="bg-sidebar-border" />
-
-      {/* User Section */}
-      <div className="p-4 space-y-2">
-        <div className="flex items-center gap-3 rounded-lg bg-sidebar-accent p-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary">
-            <span className="text-sm font-medium text-primary-foreground">{userInitial}</span>
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-sidebar-accent-foreground truncate">
-              {session?.user?.name || '読み込み中...'}
-            </p>
-            <p className="text-xs text-muted-foreground truncate">
-              {session?.user?.email || ''}
-            </p>
-          </div>
-        </div>
-
-        {/* Logout Button */}
-        <Button
-          variant="ghost"
-          className="w-full justify-start text-muted-foreground hover:text-sidebar-accent-foreground"
-          onClick={handleLogout}
-        >
-          <LogOut className="mr-2 h-4 w-4" />
-          ログアウト
-        </Button>
-      </div>
+      {/* Session-dependent footer */}
+      <SidebarFooter currentPath={pathname} onClose={onClose} />
     </aside>
   )
 })

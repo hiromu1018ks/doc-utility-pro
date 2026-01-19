@@ -64,25 +64,26 @@ export default function PageNumbersPage() {
   const [, { addActivity }] = useDashboardData()
   const [, { show }] = useNotifications()
 
-  // Track successful page numbering completion
+  // Track page numbering completion and errors (unified effect to prevent double renders)
   useEffect(() => {
+    const fileName = state.file?.name || 'PDFファイル'
+    // Success case
     if (state.numberingResult) {
       addActivity('numbering', state.numberingResult.filename, 'completed', {
         pageCount: state.numberingResult.pages,
       })
       show('success', 'ページ番号の追加が完了しました', `${state.numberingResult.pages}ページのPDFを作成しました`)
+      return
     }
-  }, [state.numberingResult, addActivity, show])
-
-  // Track page numbering errors
-  useEffect(() => {
+    // Error case
     if (state.error) {
-      addActivity('numbering', state.file?.name || 'PDFファイル', 'failed', {
+      addActivity('numbering', fileName, 'failed', {
         errorMessage: state.error,
       })
       show('error', 'ページ番号の追加に失敗しました', state.error)
+      return
     }
-  }, [state.error, state.file, addActivity, show])
+  }, [state.numberingResult, state.error, state.file, addActivity, show])
 
   /**
    * ファイル選択ハンドラ

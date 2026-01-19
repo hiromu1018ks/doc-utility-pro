@@ -30,26 +30,27 @@ export default function PdfPagesPage() {
   const [, { addActivity }] = useDashboardData()
   const [, { show }] = useNotifications()
 
-  // Track successful PDF export completion
+  // Track PDF export completion and errors (unified effect to prevent double renders)
   useEffect(() => {
+    const fileName = state.file?.name || 'PDFファイル'
+    // Success case
     if (state.result) {
       addActivity('page-manage', state.result.filename, 'completed', {
         fileSize: state.result.size,
         pageCount: state.result.pages,
       })
       show('success', 'PDFのエクスポートが完了しました', `${state.result.pages}ページのPDFを作成しました`)
+      return
     }
-  }, [state.result, addActivity, show])
-
-  // Track PDF management errors
-  useEffect(() => {
+    // Error case
     if (state.error) {
-      addActivity('page-manage', state.file?.name || 'PDFファイル', 'failed', {
+      addActivity('page-manage', fileName, 'failed', {
         errorMessage: state.error,
       })
       show('error', '処理に失敗しました', state.error)
+      return
     }
-  }, [state.error, state.file, addActivity, show])
+  }, [state.result, state.error, state.file, addActivity, show])
 
   // ファイル名を抽出
   const fileName = useMemo(() => state.file?.name || null, [state.file])

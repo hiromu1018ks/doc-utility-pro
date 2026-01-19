@@ -1,5 +1,6 @@
 "use client"
 
+import { memo, useMemo } from "react"
 import FileText from 'lucide-react/dist/esm/icons/file-text'
 import CheckCircle from 'lucide-react/dist/esm/icons/check-circle'
 import Layout from 'lucide-react/dist/esm/icons/layout'
@@ -13,8 +14,21 @@ import Link from "next/link"
 import { useSession } from "@/hooks/use-session"
 import { useDashboardData } from "@/hooks/use-dashboard-data"
 import { formatBytes } from "@/lib/storage"
+import type { RecentActivity } from "@/types"
 
-// クイックアクセスツール（静的定義）
+// ============================================================================
+// 静的定義
+// ============================================================================
+
+/** 統計カードの静的設定 */
+const STAT_CARD_CONFIG = [
+  { label: "総ドキュメント", icon: FileText, color: "text-blue-500" },
+  { label: "処理済み", icon: CheckCircle, color: "text-green-500" },
+  { label: "失敗", icon: Clock, color: "text-red-500" },
+  { label: "ストレージ使用量", icon: HardDrive, color: "text-orange-500" },
+] as const
+
+/** クイックアクセスツール（静的定義） */
 const tools = [
   {
     title: "PDF結合",
@@ -46,38 +60,75 @@ const tools = [
   },
 ]
 
+// ============================================================================
+// メモ化されたサブコンポーネント
+// ============================================================================
+
+/** 統計カード（メモ化） */
+const StatCard = memo(function StatCard({
+  config,
+  value,
+}: {
+  config: typeof STAT_CARD_CONFIG[number]
+  value: string
+}) {
+  const Icon = config.icon
+  return (
+    <Card>
+      <CardContent className="flex items-center gap-4 p-6">
+        <div className={`rounded-lg bg-muted p-3 ${config.color}`}>
+          <Icon className="h-6 w-6" />
+        </div>
+        <div>
+          <p className="text-2xl font-bold text-foreground">{value}</p>
+          <p className="text-sm text-muted-foreground">{config.label}</p>
+        </div>
+      </CardContent>
+    </Card>
+  )
+})
+
+/** アクティビティアイテム（メモ化） */
+const ActivityItem = memo(function ActivityItem({
+  activity,
+}: {
+  activity: RecentActivity
+}) {
+  return (
+    <div className="flex items-center justify-between rounded-lg border border-border bg-card p-3">
+      <div className="flex items-center gap-3">
+        <FileText className="h-5 w-5 text-red-500" />
+        <div>
+          <p className="text-sm font-medium text-foreground">{activity.fileName}</p>
+          <p className="text-xs text-muted-foreground">
+            {activity.action}・{activity.time}
+          </p>
+        </div>
+      </div>
+      <Badge
+        variant={activity.status === "completed" ? "default" : "destructive"}
+      >
+        {activity.status === "completed" ? "完了" : "失敗"}
+      </Badge>
+    </div>
+  )
+})
+
 export default function DashboardPage() {
   const { session } = useSession()
   const [{ stats, recentActivities, isLoading }] = useDashboardData()
   const userName = session?.user?.name || 'ユーザー'
 
-  // 統計カードを動的に生成
-  const statsCards = [
-    {
-      label: "総ドキュメント",
-      value: stats.totalDocuments.toString(),
-      icon: FileText,
-      color: "text-blue-500",
-    },
-    {
-      label: "処理済み",
-      value: stats.processedCount.toString(),
-      icon: CheckCircle,
-      color: "text-green-500",
-    },
-    {
-      label: "失敗",
-      value: stats.failedCount.toString(),
-      icon: Clock,
-      color: "text-red-500",
-    },
-    {
-      label: "ストレージ使用量",
-      value: formatBytes(stats.totalStorageUsed),
-      icon: HardDrive,
-      color: "text-orange-500",
-    },
-  ]
+  // 統計値の計算（メモ化）
+  const statValues = useMemo(
+    () => [
+      stats.totalDocuments.toString(),
+      stats.processedCount.toString(),
+      stats.failedCount.toString(),
+      formatBytes(stats.totalStorageUsed),
+    ],
+    [stats]
+  )
 
   return (
     <div className="space-y-6 p-6">
@@ -93,22 +144,9 @@ export default function DashboardPage() {
 
       {/* Stats Cards */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {statsCards.map((stat) => {
-          const Icon = stat.icon
-          return (
-            <Card key={stat.label}>
-              <CardContent className="flex items-center gap-4 p-6">
-                <div className={`rounded-lg bg-muted p-3 ${stat.color}`}>
-                  <Icon className="h-6 w-6" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold text-foreground">{stat.value}</p>
-                  <p className="text-sm text-muted-foreground">{stat.label}</p>
-                </div>
-              </CardContent>
-            </Card>
-          )
-        })}
+        {STAT_CARD_CONFIG.map((config, index) => (
+          <StatCard key={config.label} config={config} value={statValues[index]} />
+        ))}
       </div>
 
       {/* Quick Tools */}
@@ -168,27 +206,7 @@ export default function DashboardPage() {
           ) : recentActivities.length > 0 ? (
             <div className="space-y-3">
               {recentActivities.map((activity) => (
-                <div
-                  key={activity.id}
-                  className="flex items-center justify-between rounded-lg border border-border bg-card p-3"
-                >
-                  <div className="flex items-center gap-3">
-                    <FileText className="h-5 w-5 text-red-500" />
-                    <div>
-                      <p className="text-sm font-medium text-foreground">
-                        {activity.fileName}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {activity.action}・{activity.time}
-                      </p>
-                    </div>
-                  </div>
-                  <Badge
-                    variant={activity.status === "completed" ? "default" : "destructive"}
-                  >
-                    {activity.status === "completed" ? "完了" : "失敗"}
-                  </Badge>
-                </div>
+                <ActivityItem key={activity.id} activity={activity} />
               ))}
             </div>
           ) : (

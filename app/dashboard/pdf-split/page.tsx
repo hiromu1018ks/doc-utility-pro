@@ -48,25 +48,26 @@ export default function PDFSplitPage() {
   const [, { addActivity }] = useDashboardData()
   const [, { show }] = useNotifications()
 
-  // Track successful split completion
+  // Track split completion and errors (unified effect to prevent double renders)
   useEffect(() => {
+    const fileName = state.file?.name || 'PDFファイル'
+    // Success case
     if (state.splitResult) {
-      addActivity('split', state.file?.name || 'PDFファイル', 'completed', {
+      addActivity('split', fileName, 'completed', {
         pageCount: state.splitResult.totalSplits,
       })
       show('success', 'PDFの分割が完了しました', `${state.splitResult.totalSplits}個のPDFを生成しました`)
+      return
     }
-  }, [state.splitResult, state.file, addActivity, show])
-
-  // Track split errors
-  useEffect(() => {
+    // Error case
     if (state.error) {
-      addActivity('split', state.file?.name || 'PDFファイル', 'failed', {
+      addActivity('split', fileName, 'failed', {
         errorMessage: state.error,
       })
       show('error', '分割に失敗しました', state.error)
+      return
     }
-  }, [state.error, state.file, addActivity, show])
+  }, [state.splitResult, state.error, state.file, addActivity, show])
 
   // 分割ステータスの判定
   const splitStatus: 'idle' | 'processing' | 'completed' | 'error' = state.isProcessing

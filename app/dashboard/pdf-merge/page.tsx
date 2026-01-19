@@ -68,26 +68,26 @@ export default function PDFMergePage() {
   const [, { addActivity }] = useDashboardData()
   const [, { show }] = useNotifications()
 
-  // Track successful merge completion
+  // Track merge completion and errors (unified effect to prevent double renders)
   useEffect(() => {
+    // Success case
     if (state.mergeResult) {
       addActivity('merge', state.mergeResult.filename, 'completed', {
         fileSize: state.mergeResult.size,
         pageCount: state.mergeResult.pages,
       })
       show('success', 'PDFの結合が完了しました', `${state.mergeResult.pages}ページのPDFを作成しました`)
+      return
     }
-  }, [state.mergeResult, addActivity, show])
-
-  // Track merge errors
-  useEffect(() => {
+    // Error case
     if (state.error) {
       addActivity('merge', '複数のPDF', 'failed', {
         errorMessage: state.error,
       })
       show('error', '結合に失敗しました', state.error)
+      return
     }
-  }, [state.error, addActivity, show])
+  }, [state.mergeResult, state.error, addActivity, show])
 
   // 結合ステータスの判定
   const mergeStatus: 'idle' | 'processing' | 'completed' | 'error' = state.isProcessing

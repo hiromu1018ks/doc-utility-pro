@@ -38,7 +38,6 @@ export default function DashboardLayout({
   // Memoize handlers to prevent unnecessary re-renders of child components
   const handleMenuClick = useCallback(() => setSidebarOpen(true), [])
   const handleSidebarClose = useCallback(() => setSidebarOpen(false), [])
-  const handleBackdropClick = useCallback(() => setSidebarOpen(false), [])
 
   return (
     <div className="flex h-screen overflow-hidden bg-background">
@@ -52,7 +51,7 @@ export default function DashboardLayout({
         <>
           <div
             className="fixed inset-0 z-40 bg-black/50 lg:hidden"
-            onClick={handleBackdropClick}
+            onClick={handleSidebarClose}
           />
           <div className="fixed inset-y-0 left-0 z-50 lg:hidden">
             <Sidebar
