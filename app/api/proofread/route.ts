@@ -3,7 +3,7 @@ import { streamText } from 'ai'
 import { MAX_TEXT_LENGTH } from '@/lib/constants'
 
 // Vercel AI SDKの設定
-export const maxDuration = 60
+export const maxDuration = 120 // タイムアウトを60秒から120秒に延長（長文校正の成功率向上）
 
 // Static instruction mapping moved outside function for better performance
 const OPTION_INSTRUCTIONS: Record<string, string> = {
@@ -60,7 +60,7 @@ export async function POST(req: Request) {
 
     // 有効なオプションを抽出
     const enabledOptions = Object.entries(options || {})
-      .filter(([_, enabled]) => enabled === true)
+      .filter(([, enabled]) => enabled === true)
       .map(([key]) => key)
 
     if (enabledOptions.length === 0) {

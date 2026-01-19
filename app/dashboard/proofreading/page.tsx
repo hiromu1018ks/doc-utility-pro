@@ -2,12 +2,10 @@
 
 import { useState, useEffect, useRef, useTransition, Suspense } from "react"
 import Settings from 'lucide-react/dist/esm/icons/settings'
-import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { TextInput } from "@/components/proofreading/text-input"
 import dynamic from 'next/dynamic'
 import { ProofreadingOptions, ProofreadingResult, DEFAULT_PROOFREADING_OPTIONS } from "@/types"
-import { MAX_TEXT_LENGTH } from "@/lib/constants"
 
 // Dynamic imports for better bundle splitting and code splitting
 const OptionsPanel = dynamic(
@@ -61,6 +59,8 @@ export default function ProofreadingPage() {
   const [error, setError] = useState<string | null>(null)
   const [warning, setWarning] = useState<string | null>(null)
   const [isMobileOptionsOpen, setIsMobileOptionsOpen] = useState(false)
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars -- Will be used for retry UI in future enhancements
+  const [retryCount, setRetryCount] = useState(0)
   const [, startTransition] = useTransition()
 
   // AbortController for cancelling requests
@@ -99,6 +99,9 @@ export default function ProofreadingPage() {
   const handleProofread = async () => {
     if (!inputText.trim()) return
 
+    // リトライ状態をリセット
+    setRetryCount(0)
+
     // 直ちに新しいAbortControllerを作成して割り込みを防ぐ
     const controller = new AbortController()
     const previousController = abortControllerRef.current
@@ -115,190 +118,229 @@ export default function ProofreadingPage() {
     setError(null)
     setWarning(null)
 
-    // タイムアウト設定（サーバーのmaxDurationより少し長く設定）
-    const TIMEOUT_MS = 65000 // 65秒
-    const timeoutId = setTimeout(() => {
-      controller.abort()
-      setError('リクエストがタイムアウトしました。もう一度お試しください。')
-    }, TIMEOUT_MS)
+    // リトライ設定
+    const MAX_RETRIES = 3
+    const BASE_DELAY_MS = 1000 // 1秒
+    const TIMEOUT_MS = 125000 // 125秒（サーバーの120秒より少し長く設定）
 
-    try {
-      const response = await fetch("/api/proofread", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          text: inputText,
-          options,
-        }),
-        signal: controller.signal,
-      })
-
-      // タイムアウトをクリア
-      clearTimeout(timeoutId)
-
-      // エラーレスポンスの安全なパース
-      if (!response.ok) {
-        let errorMessage = "校正処理に失敗しました"
-        try {
-          const contentType = response.headers.get("content-type")
-          if (contentType?.includes("application/json")) {
-            const errorData = await response.json()
-            errorMessage = errorData.error || errorMessage
-          } else {
-            errorMessage = `サーバーエラー (${response.status}): ${response.statusText}`
-          }
-        } catch (parseError) {
-          console.error('[PROOFREAD_RESPONSE_PARSE_ERROR]', {
-            status: response.status,
-            statusText: response.statusText,
-            parseError
-          })
-          errorMessage = `サーバーエラー (${response.status})`
+    // テキストチャンクをパースするヘルパー関数（重複排除）
+    const parseTextChunk = (line: string, accumulator: string): string => {
+      if (!line.startsWith("0:")) return accumulator
+      const colonIndex = line.indexOf(':')
+      if (colonIndex === -1) return accumulator
+      try {
+        const jsonValue = line.slice(colonIndex + 1)
+        const parsed = JSON.parse(jsonValue)
+        if (typeof parsed === 'string' && parsed.length > 0) {
+          return accumulator + parsed
         }
-        throw new Error(errorMessage)
+      } catch {
+        // パースエラーは無視
+      }
+      return accumulator
+    }
+
+    // リトライループ
+    for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+      setRetryCount(attempt)
+
+      // 前の試行のAbortControllerをクリーンアップ（メモリリーク防止）
+      const previousAttemptController = abortControllerRef.current
+      if (previousAttemptController && previousAttemptController !== controller) {
+        previousAttemptController.abort()
       }
 
-      // ストリーミングレスポンスを読み込む
-      const reader = response.body?.getReader()
-      const decoder = new TextDecoder()
+      // この試行用のAbortControllerを作成
+      const attemptController = new AbortController()
+      abortControllerRef.current = attemptController
 
-      if (!reader) {
-        throw new Error("レスポンスの読み込みに失敗しました")
-      }
+      const timeoutId = setTimeout(() => {
+        attemptController.abort()
+      }, TIMEOUT_MS)
 
-      let accumulatedText = ""
-      let buffer = ""
-      let streamErrorOccurred = false
-      let debugLogs: string[] = []
-
-      const addLog = (msg: string) => {
-        console.log('[STREAM_DEBUG]', msg)
-        debugLogs.push(msg)
-      }
-
-      addLog('ストリーミング開始')
+      let reader: ReadableStreamDefaultReader<Uint8Array> | null = null
 
       try {
-        while (true) {
-          const { done, value } = await reader.read()
-          if (done) {
-            addLog(`完了: 全${accumulatedText.length}文字`)
-            break
-          }
-
-          const chunk = decoder.decode(value, { stream: true })
-          addLog(`チャンク (${chunk.length}文字): "${chunk.substring(0, 200)}"`)
-          buffer += chunk
-
-          // Vercel AI SDK data stream format:
-          // - f:"..." - メタデータ（開始）
-          // - 0:"text" - テキストチャンク（複数がスペース区切りで来る）
-          // - d:"..." - メタデータ（終了）
-
-          // 各行は改行で区切られている
-          const lines = buffer.split("\n")
-          buffer = lines.pop() || ""
-
-          addLog(`${lines.length}行を処理、バッファ残り: "${buffer.substring(0, 50)}"`)
-
-          for (const line of lines) {
-            if (!line) continue
-
-            addLog(`行解析: "${line.substring(0, 50)}..."`)
-
-            // テキストチャンクの処理
-            if (line.startsWith("0:")) {
-              try {
-                const colonIndex = line.indexOf(':')
-                if (colonIndex === -1) continue
-                const jsonValue = line.slice(colonIndex + 1)
-                const parsed = JSON.parse(jsonValue)
-                if (typeof parsed === 'string' && parsed.length > 0) {
-                  accumulatedText += parsed
-                  addLog(`✓ テキスト追加: "${parsed}" (合計${accumulatedText.length}文字)`)
-                  setCorrectedText(accumulatedText)
-                }
-              } catch (parseError) {
-                console.error('[PARSE_ERROR]', { line, error: parseError })
-                streamErrorOccurred = true
-              }
-            }
-            // メタデータは無視
-            else if (line.startsWith("f:") || line.startsWith("d:")) {
-              addLog(`メタデータスキップ: ${line.substring(0, 30)}`)
-            }
-            // エラー
-            else if (line.startsWith("error:")) {
-              console.error('[STREAM_ERROR]', line)
-            }
-          }
-        }
-
-        // バッファに残っているデータを処理
-        if (buffer) {
-          addLog(`バッファ処理: "${buffer}"`)
-          if (buffer.startsWith("0:")) {
-            try {
-              const colonIndex = buffer.indexOf(':')
-              const jsonValue = buffer.slice(colonIndex + 1)
-              const parsed = JSON.parse(jsonValue)
-              if (typeof parsed === 'string' && parsed.length > 0) {
-                accumulatedText += parsed
-                addLog(`✓ バッファからテキスト追加: "${parsed}"`)
-                setCorrectedText(accumulatedText)
-              }
-            } catch (parseError) {
-              console.error('[BUFFER_PARSE_ERROR]', { buffer, error: parseError })
-              streamErrorOccurred = true
-            }
-          }
-        }
-
-        addLog(`最終結果: ${accumulatedText.length}文字`)
-        addLog(`デバッグログ (${debugLogs.length}件)`)
-
-        if (streamErrorOccurred && accumulatedText.length > 0) {
-          setWarning('一部のテキストが正しく受信できませんでした。結果が不完全である可能性があります。')
-        }
-
-        if (accumulatedText.length > 0) {
-          // Use transition for non-urgent UI update
-          startTransition(() => setShowResult(true))
-        } else {
-          console.error('[EMPTY_RESULT] デバッグログ:', debugLogs)
-          setError('校正結果が空です。コンソールログを確認してください。')
-        }
-      } catch (streamErr) {
-        // ストリーム読み込みエラー
-        console.error('[PROOFREAD_STREAM_READ_ERROR]', {
-          error: streamErr instanceof Error ? streamErr.message : String(streamErr),
-          accumulatedLength: accumulatedText.length,
-          hasPartialData: accumulatedText.length > 0
+        const response = await fetch("/api/proofread", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            text: inputText,
+            options,
+          }),
+          signal: attemptController.signal,
         })
-        if (accumulatedText.length > 0) {
-          setWarning('ストリーミングが中断されました。一部の結果のみ表示されています。')
-          setShowResult(true)
-        } else {
+
+        // エラーレスポンスの処理
+        if (!response.ok) {
+          // 4xxエラーはリトライしない（クライアントエラー）
+          if (response.status >= 400 && response.status < 500) {
+            let errorMessage = "校正処理に失敗しました"
+            try {
+              const contentType = response.headers.get("content-type")
+              if (contentType?.includes("application/json")) {
+                const errorData = await response.json()
+                errorMessage = errorData.error || errorMessage
+              } else {
+                errorMessage = `サーバーエラー (${response.status}): ${response.statusText}`
+              }
+            } catch {
+              errorMessage = `サーバーエラー (${response.status})`
+            }
+            throw new Error(errorMessage)
+          }
+          // 5xxエラーはリトライ可能
+          throw new Error(`Server error (${response.status})`)
+        }
+
+        // ストリーミングレスポンスを読み込む
+        reader = response.body?.getReader() ?? null
+        const decoder = new TextDecoder()
+
+        if (!reader) {
+          throw new Error("レスポンスの読み込みに失敗しました")
+        }
+
+        let accumulatedText = ""
+        let buffer = ""
+        // ストリームエラー追跡（将来的な拡張用）
+        // eslint-disable-next-line prefer-const
+        let streamErrorOccurred = false
+
+        try {
+          while (true) {
+            const { done, value } = await reader.read()
+            if (done) break
+
+            const chunk = decoder.decode(value, { stream: true })
+            buffer += chunk
+
+            // Vercel AI SDK data stream format:
+            // - f:"..." - メタデータ（開始）
+            // - 0:"text" - テキストチャンク（複数がスペース区切りで来る）
+            // - d:"..." - メタデータ（終了）
+
+            const lines = buffer.split("\n")
+            buffer = lines.pop() || ""
+
+            for (const line of lines) {
+              if (!line) continue
+              accumulatedText = parseTextChunk(line, accumulatedText)
+            }
+
+            // リアルタイムでUIを更新
+            setCorrectedText(accumulatedText)
+          }
+
+          // バッファに残っているデータを処理
+          if (buffer) {
+            accumulatedText = parseTextChunk(buffer, accumulatedText)
+            setCorrectedText(accumulatedText)
+          }
+
+          // ストリーム成功時の処理
+          if (accumulatedText.length > 0) {
+            clearTimeout(timeoutId) // 成功時にタイマーをクリア
+
+            // 最終試行でストリームエラーがあった場合のみ警告を表示
+            if (streamErrorOccurred && attempt === MAX_RETRIES) {
+              setWarning('一部のテキストが正しく受信できませんでした。結果が不完全である可能性があります。')
+            }
+            startTransition(() => setShowResult(true))
+            return // 成功 - リトライループを終了
+          } else {
+            throw new Error('校正結果が空です')
+          }
+        } catch (streamErr) {
+          // ストリーム読み込みエラー
+          console.error('[PROOFREAD_STREAM_READ_ERROR]', {
+            error: streamErr instanceof Error ? streamErr.message : String(streamErr),
+            accumulatedLength: accumulatedText.length,
+            attempt,
+          })
+
+          // 部分データがある場合、リトライ可能ならリトライを優先
+          if (accumulatedText.length > 0) {
+            if (attempt < MAX_RETRIES) {
+              console.log(`[RETRY] ストリーム中断、リトライします (${attempt + 1}/${MAX_RETRIES})`)
+              setCorrectedText("") // 次のリトライのためにテキストをリセット
+              // リトライ処理へ
+            } else {
+              // 最終試行: 部分結果を表示
+              setWarning('ストリーミングが中断されました。一部の結果のみ表示されています。')
+              setShowResult(true)
+              return
+            }
+          }
           throw streamErr
         }
+      } catch (err) {
+        clearTimeout(timeoutId)
+
+        const error = err instanceof Error ? err : new Error(String(err))
+        const isAbortError = error.name === 'AbortError'
+
+        // ユーザーキャンセル（abortControllerRefがnullにセットされている）を検出
+        const isUserCancelled = abortControllerRef.current === null
+
+        if (isAbortError) {
+          if (isUserCancelled) {
+            // ユーザーキャンセルはサイレントに処理
+            return
+          }
+          // タイムアウトエラー
+          if (attempt < MAX_RETRIES) {
+            // 指数バックオフでリトライ
+            const delayMs = BASE_DELAY_MS * Math.pow(2, attempt)
+            console.log(`[RETRY] タイムアウト、${delayMs}ms後にリトライします (${attempt + 1}/${MAX_RETRIES})`)
+            setError(`リトライ中... (${attempt + 1}/${MAX_RETRIES}回目)`)
+            await new Promise(resolve => setTimeout(resolve, delayMs))
+            setError(null)
+            continue
+          } else {
+            setError('リクエストがタイムアウトしました。もう一度お試しください。')
+            break
+          }
+        }
+
+        // ネットワークエラーまたはリトライ可能なエラー
+        if (isRetryableError(error) && attempt < MAX_RETRIES) {
+          const delayMs = BASE_DELAY_MS * Math.pow(2, attempt)
+          console.log(`[RETRY] 試行 ${attempt + 1}/${MAX_RETRIES + 1} 失敗、${delayMs}ms後にリトライします...`, {
+            error: error.message
+          })
+          setError(`リトライ中... (${attempt + 1}/${MAX_RETRIES}回目)`)
+          await new Promise(resolve => setTimeout(resolve, delayMs))
+          setError(null)
+          continue
+        }
+
+        // リトライ不可能またはリトライ回数超過
+        setError(error.message)
+        console.error("[PROOFREAD_ERROR]", err)
+        break
+      } finally {
+        // Stream readerをクリーンアップ
+        if (reader) {
+          try {
+            reader.cancel()
+          } catch {
+            // クリーンアップエラーは無視
+          }
+        }
       }
-    } catch (err) {
-      // AbortErrorはサイレントに処理（ユーザーキャンセルまたはタイムアウト）
-      // タイムアウトの場合は既に setError() が呼ばれているため、ここでは何もしない
-      if (err instanceof Error && err.name === 'AbortError') {
-        return
-      }
-      const errorMessage = err instanceof Error ? err.message : "エラーが発生しました"
-      setError(errorMessage)
-      console.error("[PROOFREAD_ERROR]", err)
-    } finally {
-      setIsStreaming(false)
-      abortControllerRef.current = null
-      // タイムアウトをクリア（timeoutIdはスコープ外なので参照できない）
-      // Note: timeoutIdはtryブロック内でクリア済み
     }
+
+    setIsStreaming(false)
+    abortControllerRef.current = null
+  }
+
+  // リトライ可能なエラーか判定
+  function isRetryableError(error: Error): boolean {
+    const message = error.message.toLowerCase()
+    return /network|timeout|connection|econnreset|etimedout|server error/i.test(message)
   }
 
   const handleClear = () => {
@@ -312,6 +354,7 @@ export default function ProofreadingPage() {
     setShowResult(false)
     setError(null)
     setWarning(null)
+    setRetryCount(0)
   }
 
   const handleNewProofreading = () => {
@@ -320,6 +363,7 @@ export default function ProofreadingPage() {
     setCorrectedText("")
     setError(null)
     setWarning(null)
+    setRetryCount(0)
   }
 
   return (
