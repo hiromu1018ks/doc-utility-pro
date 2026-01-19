@@ -9,6 +9,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import Link from "next/link"
+import { useSession } from "@/hooks/use-session"
 
 const stats = [
   { label: "総ドキュメント", value: "128", icon: FileText, color: "text-blue-500" },
@@ -80,12 +81,15 @@ const recentFiles = [
 ]
 
 export default function DashboardPage() {
+  const { session } = useSession()
+  const userName = session?.user?.name || 'ユーザー'
+
   return (
     <div className="space-y-6 p-6">
       {/* Welcome Section */}
       <div>
         <h2 className="text-2xl font-bold text-foreground">
-          おかえりなさい、田中さん
+          おかえりなさい、{userName}さん
         </h2>
         <p className="mt-1 text-muted-foreground">
           本日のドキュメント処理状況を確認してください

@@ -1,0 +1,101 @@
+// Prismaスキーマ - 認証機能用
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ユーザーモデル
+model User {
+  id                    String    @id @default(cuid())
+  email                 String    @unique
+  password              String
+  name                  String
+  role                  Role      @default(USER)
+  emailVerified         DateTime?
+  image                 String?
+  failedLoginAttempts   Int       @default(0)
+  lockUntil             DateTime?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  // NextAuth.jsリレーション
+  accounts              Account[]
+  sessions              Session[]
+  auditLogs             AuditLog[]
+}
+
+// NextAuth.js Accountモデル（OAuth等の将来拡張用）
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+// NextAuth.js Sessionモデル
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// NextAuth.js VerificationTokenモデル（メール確認用、将来拡張）
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// ユーザーロール
+enum Role {
+  ADMIN
+  USER
+}
+
+// 監査ログモデル
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String
+  action    AuditAction
+  details   String?
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+}
+
+// 監査アクション種別
+enum AuditAction {
+  USER_CREATED
+  USER_DELETED
+  USER_ROLE_CHANGED
+  USER_PASSWORD_CHANGED
+  LOGIN_SUCCESS
+  LOGIN_FAILURE
+  ACCOUNT_LOCKED
+  ACCOUNT_UNLOCKED
+}
