@@ -3,8 +3,6 @@
 import { memo } from 'react'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import FileText from 'lucide-react/dist/esm/icons/file-text'
-import File from 'lucide-react/dist/esm/icons/file'
 import X from 'lucide-react/dist/esm/icons/x'
 import MoreHorizontal from 'lucide-react/dist/esm/icons/more-horizontal'
 import GripVertical from 'lucide-react/dist/esm/icons/grip-vertical'
@@ -12,11 +10,24 @@ import { cn } from '@/lib/utils'
 import type { FileUpload } from '@/types'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { PdfIcon, DocxIcon, DefaultFileIcon } from './file-icons'
 
-// Hoisted icon components to avoid recreation on every render
-const PDF_ICON = <FileText className="h-5 w-5 text-red-500" />
-const DOCX_ICON = <File className="h-5 w-5 text-blue-500" />
-const DEFAULT_ICON = <FileText className="h-5 w-5 text-gray-500" />
+/**
+ * Get file icon component based on file type
+ *
+ * Returns fully static memoized components that never re-render,
+ * avoiding React reconciliation overhead entirely
+ */
+function getFileIcon(type: string) {
+  switch (type) {
+    case 'pdf':
+      return PdfIcon
+    case 'docx':
+      return DocxIcon
+    default:
+      return DefaultFileIcon
+  }
+}
 
 interface FileCardProps {
   file: FileUpload
@@ -26,20 +37,6 @@ interface FileCardProps {
   id: string
   /** ドラッグ可能かどうか */
   draggable?: boolean
-}
-
-/**
- * Get file icon based on file type (hoisted for performance)
- */
-function getFileIcon(type: string) {
-  switch (type) {
-    case 'pdf':
-      return PDF_ICON
-    case 'docx':
-      return DOCX_ICON
-    default:
-      return DEFAULT_ICON
-  }
 }
 
 /**
@@ -94,7 +91,10 @@ export const FileCard = memo(function FileCard({
       )}
 
       {/* File Icon */}
-      {getFileIcon(file.type)}
+      {(() => {
+        const IconComponent = getFileIcon(file.type)
+        return <IconComponent />
+      })()}
 
       {/* File Info */}
       <div className="flex-1 min-w-0">

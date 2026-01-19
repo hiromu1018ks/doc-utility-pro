@@ -1,17 +1,14 @@
 'use client'
 
-import { useState, Suspense, useMemo } from 'react'
+import { useState, useMemo } from 'react'
 import AlertCircle from 'lucide-react/dist/esm/icons/alert-circle'
 import X from 'lucide-react/dist/esm/icons/x'
-import Download from 'lucide-react/dist/esm/icons/download'
 import { Button } from '@/components/ui/button'
-import { Switch } from '@/components/ui/switch'
-import { Label } from '@/components/ui/label'
-import { Separator } from '@/components/ui/separator'
 import { usePdfPages } from '@/hooks/use-pdf-pages'
 import { PageGrid } from '@/components/pdf-pages/page-grid'
 import { PageViewer } from '@/components/pdf-pages/page-viewer'
 import { Toolbar } from '@/components/pdf-pages/toolbar'
+import { ExportPanel } from '@/components/pdf-pages/export-panel'
 import { DEFAULT_PDF_PAGE_MANAGE_OPTIONS } from '@/types'
 import dynamic from 'next/dynamic'
 
@@ -127,96 +124,17 @@ export default function PdfPagesPage() {
       </div>
 
       {/* 右パネル - エクスポートオプション */}
-      <div className="hidden w-80 border-l border-border xl:block">
-        <div className="p-6 space-y-6">
-          <div>
-            <h3 className="text-lg font-semibold text-foreground">エクスポート</h3>
-            <p className="mt-1 text-sm text-muted-foreground">
-              PDFをエクスポートしてダウンロード
-            </p>
-          </div>
-
-          <Separator />
-
-          {/* ページ情報 */}
-          <div className="space-y-3">
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-muted-foreground">総ページ数</span>
-              <span className="font-medium text-foreground">{pageCount}ページ</span>
-            </div>
-            {state.selectedIds.size > 0 && (
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">選択中</span>
-                <span className="font-medium text-primary">
-                  {state.selectedIds.size}ページ
-                </span>
-              </div>
-            )}
-          </div>
-
-          <Separator />
-
-          {/* オプション */}
-          <div className="space-y-4">
-            <h4 className="text-sm font-medium text-foreground">オプション</h4>
-
-            <div className="flex items-center justify-between">
-              <Label
-                htmlFor="keep-filename"
-                className="text-sm cursor-pointer"
-              >
-                元のファイル名を維持
-              </Label>
-              <Switch
-                id="keep-filename"
-                checked={keepFilename}
-                onClick={() => setKeepFilename(!keepFilename)}
-                disabled={state.isProcessing}
-              />
-            </div>
-          </div>
-
-          <Separator />
-
-          {/* アクション */}
-          <div className="space-y-2">
-            {state.result ? (
-              // ダウンロードボタン（エクスポート完了後）
-              <Button
-                onClick={actions.download}
-                disabled={state.isProcessing}
-                className="w-full"
-                size="lg"
-              >
-                <Download className="h-4 w-4 mr-2" />
-                ダウンロード
-              </Button>
-            ) : (
-              // エクスポートボタン
-              <Button
-                onClick={() => actions.exportPdf(exportOptions)}
-                disabled={state.isProcessing || pageCount === 0}
-                className="w-full"
-                size="lg"
-              >
-                <Download className="h-4 w-4 mr-2" />
-                PDFをエクスポート
-              </Button>
-            )}
-
-            {state.result && (
-              <Button
-                variant="outline"
-                onClick={actions.clearResult}
-                disabled={state.isProcessing}
-                className="w-full"
-              >
-                クリア
-              </Button>
-            )}
-          </div>
-        </div>
-      </div>
+      <ExportPanel
+        pageCount={state.pages.length}
+        selectedCount={state.selectedIds.size}
+        isProcessing={state.isProcessing}
+        exportOptions={exportOptions}
+        result={state.result}
+        onExport={actions.exportPdf}
+        onDownload={actions.download}
+        onClearResult={actions.clearResult}
+        onToggleKeepFilename={() => setKeepFilename(!keepFilename)}
+      />
     </div>
   )
 }
