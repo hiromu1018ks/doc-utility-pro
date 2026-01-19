@@ -1,6 +1,7 @@
 import { createOpenAI } from '@ai-sdk/openai'
 import { streamText } from 'ai'
 import { MAX_TEXT_LENGTH } from '@/lib/constants'
+import { checkRateLimit, getRemainingRequests, getResetTime } from '@/lib/rate-limit'
 
 // Vercel AI SDKの設定
 export const maxDuration = 120 // タイムアウトを60秒から120秒に延長（長文校正の成功率向上）
@@ -25,6 +26,31 @@ const OPTION_INSTRUCTIONS: Record<string, string> = {
  * レスポンス: ストリーミングで校正結果を返す
  */
 export async function POST(req: Request) {
+  // レート制限チェック（IPアドレスベース）
+  const ip = req.headers.get('x-forwarded-for')?.split(',')[0] ||
+             req.headers.get('x-real-ip') ||
+             'unknown'
+
+  if (checkRateLimit(ip)) {
+    const resetTime = getResetTime(ip)
+    return new Response(
+      JSON.stringify({
+        error: 'リクエスト数が制限を超えました。しばらく待ってから再試行してください。',
+        retryAfter: resetTime,
+      }),
+      {
+        status: 429,
+        headers: {
+          'Content-Type': 'application/json',
+          'Retry-After': String(resetTime),
+          'X-RateLimit-Limit': String(10),
+          'X-RateLimit-Remaining': String(getRemainingRequests(ip)),
+          'X-RateLimit-Reset': String(resetTime),
+        },
+      }
+    )
+  }
+
   // APIキーの検証（リクエストハンドラー内で実行）
   const apiKey = process.env.ZAI_API_KEY || process.env.OPENAI_API_KEY
   if (!apiKey) {
@@ -82,9 +108,12 @@ export async function POST(req: Request) {
     )
 
     console.log('[PROOFREAD_API]', {
+      event: 'proofread_request',
       inputLength: text.length,
       estimatedInputTokens: inputTokenEstimate,
       maxTokens: dynamicMaxTokens,
+      timestamp: new Date().toISOString(),
+      requestId: crypto.randomUUID?.() ?? undefined,
     })
 
     // z.aiのGLM-4.7を使用
@@ -104,19 +133,43 @@ export async function POST(req: Request) {
     // ストリーミングレスポンスを返す
     return result.toDataStreamResponse()
   } catch (error) {
-    // エラーログ（詳細は開発環境のみ露出）
     const isDevelopment = process.env.NODE_ENV === 'development'
+
+    // エラーの種類に応じて適切なメッセージとステータスコードを設定
+    let errorMessage = '校正処理に失敗しました'
+    let statusCode = 500
+
+    if (error instanceof SyntaxError) {
+      errorMessage = 'リクエスト形式が無効です'
+      statusCode = 400
+    } else if (error instanceof Error) {
+      const errorMsg = error.message.toLowerCase()
+
+      if (errorMsg.includes('timeout') || errorMsg.includes('etimedout')) {
+        errorMessage = '処理がタイムアウトしました。テキストを短くして再試行してください。'
+        statusCode = 504
+      } else if (errorMsg.includes('fetch') || errorMsg.includes('network')) {
+        errorMessage = 'AIサービスに接続できません。後でもう一度お試しください。'
+        statusCode = 503
+      } else if (errorMsg.includes('rate limit') || errorMsg.includes('quota')) {
+        errorMessage = 'APIリクエスト上限に達しました。しばらく待ってから再試行してください。'
+        statusCode = 429
+      }
+    }
+
     console.error('[PROOFREAD_API_ERROR]', {
       message: error instanceof Error ? error.message : 'Unknown error',
+      type: error?.constructor?.name,
+      statusCode,
       ...(isDevelopment && { stack: error instanceof Error ? error.stack : undefined }),
     })
 
     return new Response(
       JSON.stringify({
-        error: '校正処理に失敗しました',
+        error: errorMessage,
         ...(isDevelopment && { details: error instanceof Error ? error.message : 'Unknown error' })
       }),
-      { status: 500, headers: { 'Content-Type': 'application/json' } }
+      { status: statusCode, headers: { 'Content-Type': 'application/json' } }
     )
   }
 }

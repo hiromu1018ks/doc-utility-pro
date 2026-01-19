@@ -22,6 +22,8 @@ export function RangePreview({
   disabled = false,
 }: RangePreviewProps) {
   // バリデーション結果から範囲情報を取得
+  // React Hooksのルールにより、条件分岐やearly returnの前に
+  // すべてのフック呼び出しを配置する必要がある
   const validationResult = useMemo(() => {
     if (!rangesInput || rangesInput.trim() === '') {
       return { isValid: false, ranges: [], errors: [], totalPages: 0 }
@@ -29,16 +31,10 @@ export function RangePreview({
     return parsePageRanges(rangesInput, totalPages)
   }, [rangesInput, totalPages])
 
-  const { isValid, ranges, errors } = validationResult
+  const { isValid, ranges } = validationResult
 
-  // 無効な場合は何も表示しない
-  if (!isValid || ranges.length === 0) {
-    return null
-  }
-
-  // ページグリッドを作成（100ページ以下の場合のみ）
-  const shouldShowGrid = totalPages <= 100
-
+  // 選択ページを計算
+  // React Hooksのルールにより、条件分岐前にフックを配置する必要がある
   const selectedPages = useMemo(() => {
     const pages: number[] = []
     for (const range of ranges) {
@@ -48,6 +44,14 @@ export function RangePreview({
     }
     return pages
   }, [ranges])
+
+  // 無効な場合は何も表示しない（すべてのフック呼び出しの後）
+  if (!isValid || ranges.length === 0) {
+    return null
+  }
+
+  // ページグリッドを作成（100ページ以下の場合のみ）
+  const shouldShowGrid = totalPages <= 100
 
   return (
     <div className={cn('space-y-3', disabled && 'opacity-50')}>

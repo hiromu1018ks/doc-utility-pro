@@ -1,6 +1,6 @@
 'use client'
 
-import { memo, type ReactNode } from 'react'
+import { memo } from 'react'
 import Download from 'lucide-react/dist/esm/icons/download'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'

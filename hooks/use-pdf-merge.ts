@@ -16,7 +16,6 @@ import { mergePDFs } from '@/lib/pdf-merger'
 import {
   validateFilesToAdd,
   validateMerge,
-  type ValidationResult,
 } from '@/lib/pdf-validation'
 import { filesToFileUploads, downloadBlob } from '@/lib/file-utils'
 

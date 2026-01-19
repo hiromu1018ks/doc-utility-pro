@@ -7,7 +7,6 @@ import { Switch } from '@/components/ui/switch'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import type { PdfMergeOptions, MergeStatus } from '@/types'
-import { DEFAULT_PDF_MERGE_OPTIONS } from '@/types'
 import Loader2 from 'lucide-react/dist/esm/icons/loader-2'
 import Download from 'lucide-react/dist/esm/icons/download'
 

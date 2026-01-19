@@ -5,7 +5,7 @@
 
 'use client'
 
-import { useState, useMemo, useEffect } from 'react'
+import { useMemo } from 'react'
 import { PageRangeInput } from './page-range-input'
 import { RangePreview } from './range-preview'
 import { parsePageRanges } from '@/lib/pdf-splitter'
@@ -69,27 +69,12 @@ export function SplitOptions({
   totalPages,
   splitStatus = 'idle',
 }: SplitOptionsProps) {
-  // optionsから初期値を同期
-  const [partsCount, setPartsCount] = useState(
-    options.partsCount ?? Math.min(2, totalPages)
-  )
-  const [pagesPerSplit, setPagesPerSplit] = useState(
-    options.pagesPerSplit ?? 1
-  )
-
-  // options.partsCountの変更を同期
-  useEffect(() => {
-    if (options.partsCount !== undefined) {
-      setPartsCount(options.partsCount)
-    }
-  }, [options.partsCount])
-
-  // options.pagesPerSplitの変更を同期
-  useEffect(() => {
-    if (options.pagesPerSplit !== undefined) {
-      setPagesPerSplit(options.pagesPerSplit)
-    }
-  }, [options.pagesPerSplit])
+  // optionsから値を取得（propsを直接使用して同期問題を回避）
+  // 以前の実装ではuseStateとuseEffectでoptionsの値をローカル状態にコピーしていたが、
+  // Props Drillingパターンとして親コンポーネントが状態を管理するため、
+  // 直接propsを使用することで不整合を回避する
+  const partsCount = options.partsCount ?? Math.min(2, totalPages)
+  const pagesPerSplit = options.pagesPerSplit ?? 1
 
   // 範囲指定が有効かチェック
   const isRangeValid = useMemo(() => {
@@ -136,14 +121,12 @@ export function SplitOptions({
   // 分割数を変更（上限チェック付き）
   const handlePartsCountChange = (value: number) => {
     const clampedValue = Math.min(totalPages, Math.max(2, value))
-    setPartsCount(clampedValue)
     onOptionsChange({ ...options, partsCount: clampedValue })
   }
 
   // ページ数を変更（上限チェック付き）
   const handlePagesPerSplitChange = (value: number) => {
     const clampedValue = Math.min(totalPages, Math.max(1, value))
-    setPagesPerSplit(clampedValue)
     onOptionsChange({ ...options, pagesPerSplit: clampedValue })
   }
 

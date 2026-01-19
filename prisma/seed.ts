@@ -25,7 +25,7 @@ async function main() {
   const hashedPassword = await bcrypt.hash(adminPassword, 12)
 
   // 管理者ユーザーを作成
-  const user = await db.user.create({
+  await db.user.create({
     data: {
       email: adminEmail,
       password: hashedPassword,

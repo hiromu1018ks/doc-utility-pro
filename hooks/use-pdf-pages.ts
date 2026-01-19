@@ -12,7 +12,6 @@ import type {
   PdfPageManageResult,
   PdfPageManageOptions,
   HistoryEntry,
-  RotationDegrees,
 } from '@/types'
 import {
   loadPdfPages,

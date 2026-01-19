@@ -81,7 +81,7 @@ export class ThumbnailCache {
    */
   clear(): void {
     // すべてのBlob URLを解放してからクリア
-    for (const [key, entry] of this.cache.entries()) {
+    for (const [, entry] of this.cache.entries()) {
       this.revokeUrl(entry.dataUrl)
     }
     this.cache.clear()
@@ -202,7 +202,7 @@ export async function generatePageThumbnail(
 export async function generatePageThumbnailWithCanvas(
   pdfBytes: Uint8Array,
   pageIndex: number,
-  options: Partial<ThumbnailOptions> = {}
+  _options: Partial<ThumbnailOptions> = {}
 ): Promise<string> {
   // TODO: pdf.jsを導入した場合の実装
   throw new Error('Canvas-based thumbnail generation requires pdf.js library')

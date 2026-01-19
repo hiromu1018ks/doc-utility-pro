@@ -11,7 +11,6 @@ import type {
   PdfSplitOptions,
   ProcessingProgress,
   SplitBatchResult,
-  SplitResult,
 } from '@/types'
 import { splitPDF, getPdfPageCount } from '@/lib/pdf-splitter'
 import { validateFile } from '@/lib/pdf-validation'

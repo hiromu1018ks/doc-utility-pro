@@ -8,7 +8,6 @@ import Redo2 from 'lucide-react/dist/esm/icons/redo-2'
 import CheckSquare from 'lucide-react/dist/esm/icons/check-square'
 import Square from 'lucide-react/dist/esm/icons/square'
 import { Button } from '@/components/ui/button'
-import { cn } from '@/lib/utils'
 
 interface ToolbarProps {
   selectedCount: number

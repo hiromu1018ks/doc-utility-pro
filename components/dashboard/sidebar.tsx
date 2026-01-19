@@ -44,15 +44,8 @@ interface SidebarProps {
 }
 
 // セッションに依存する下部セクション（メモ化）
-const SidebarFooter = memo(function SidebarFooter({
-  currentPath,
-  onClose,
-}: {
-  currentPath: string
-  onClose?: () => void
-}) {
+const SidebarFooter = memo(function SidebarFooter() {
   const { session } = useSession()
-  const isAdmin = session?.user?.role === 'ADMIN'
   const userInitial = session?.user?.name?.charAt(0) || 'U'
 
   const handleLogout = async () => {
@@ -184,7 +177,7 @@ export const Sidebar = memo(function Sidebar({ currentPath = "/", onClose }: Sid
       </nav>
 
       {/* Session-dependent footer */}
-      <SidebarFooter currentPath={pathname} onClose={onClose} />
+      <SidebarFooter />
     </aside>
   )
 })

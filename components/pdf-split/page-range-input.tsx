@@ -5,7 +5,7 @@
 
 'use client'
 
-import { useState, useEffect, useMemo, memo } from 'react'
+import { useState, useMemo, memo } from 'react'
 import { parsePageRanges } from '@/lib/pdf-splitter'
 import type { RangeValidationResult } from '@/types'
 import AlertCircle from 'lucide-react/dist/esm/icons/alert-circle'

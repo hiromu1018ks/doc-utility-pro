@@ -201,6 +201,12 @@ export function usePdfCompression(): [UsePdfCompressionState, UsePdfCompressionA
     try {
       downloadBlob(compressionResult.blob, compressionResult.filename)
     } catch (err) {
+      // エラーをログ記録
+      console.error('[PDF_DOWNLOAD] Failed:', {
+        error: err instanceof Error ? err.message : String(err),
+        filename: compressionResult.filename,
+        size: compressionResult.blob.size,
+      })
       setError('ファイルのダウンロードに失敗しました')
     }
   }, [compressionResult])

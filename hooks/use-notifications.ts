@@ -59,6 +59,39 @@ export function useNotifications(): [UseNotificationsState, UseNotificationsActi
   // タイマー参照を保持（クリーンアップ用）
   const timersRef = useRef<Map<string, NodeJS.Timeout>>(new Map())
 
+  // dismiss関数への安定した参照を保持（show内での使用のため）
+  // useRefを使用することで、showの依存配列にdismissを含めずに済み、
+  // useEffect内でdismissが更新された際にshowが再生成されないようにする
+  const dismissRef = useRef<(id: string) => void | null>(null)
+
+  /**
+   * 通知を消去
+   *
+   * @param id - 消去する通知ID
+   */
+  const dismiss = useCallback((id: string) => {
+    // タイマーをクリア
+    const timer = timersRef.current.get(id)
+    if (timer) {
+      try {
+        clearTimeout(timer)
+      } catch (err) {
+        console.error('[NOTIFICATIONS] Failed to clear timer:', { id, error: err })
+      }
+      timersRef.current.delete(id)
+    }
+
+    setNotifications((prev) => prev.filter((n) => n.id !== id))
+  }, [])
+
+  // dismissRefを更新（useEffect内で行うことで、dismissの依存関係を安定させる）
+  useEffect(() => {
+    dismissRef.current = dismiss
+    return () => {
+      dismissRef.current = null
+    }
+  }, [dismiss])
+
   /**
    * 通知を表示
    *
@@ -94,7 +127,7 @@ export function useNotifications(): [UseNotificationsState, UseNotificationsActi
       // 自動消去タイマーを設定
       if (duration !== undefined) {
         const timer = setTimeout(() => {
-          dismiss(id)
+          dismissRef.current?.(id)
         }, duration)
 
         timersRef.current.set(id, timer)
@@ -104,22 +137,6 @@ export function useNotifications(): [UseNotificationsState, UseNotificationsActi
     },
     []
   )
-
-  /**
-   * 通知を消去
-   *
-   * @param id - 消去する通知ID
-   */
-  const dismiss = useCallback((id: string) => {
-    // タイマーをクリア
-    const timer = timersRef.current.get(id)
-    if (timer) {
-      clearTimeout(timer)
-      timersRef.current.delete(id)
-    }
-
-    setNotifications((prev) => prev.filter((n) => n.id !== id))
-  }, [])
 
   /**
    * 全通知を消去

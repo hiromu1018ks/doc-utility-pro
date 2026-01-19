@@ -3,7 +3,6 @@
 "use client"
 
 import { useEffect, useState } from 'react'
-import { Session } from 'next-auth'
 
 export interface User {
   id: string
@@ -15,6 +14,7 @@ export interface User {
 export function useSession() {
   const [session, setSession] = useState<{ user: User } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     async function loadSession() {
@@ -23,9 +23,16 @@ export function useSession() {
         if (res.ok) {
           const data = await res.json()
           setSession(data)
+          setError(null)
+        } else if (res.status >= 500) {
+          // サーバーエラー - 単なる未認証状態ではない
+          setError('セッションの読み込みに失敗しました')
+          console.error('[SESSION] Server error:', res.status)
         }
-      } catch (error) {
-        console.error('Failed to load session:', error)
+        // 4xxエラー（401など）は通常の未認証状態として扱う
+      } catch (err) {
+        console.error('[SESSION] Network error:', err)
+        setError('ネットワークエラーが発生しました')
       } finally {
         setIsLoading(false)
       }
@@ -34,5 +41,5 @@ export function useSession() {
     loadSession()
   }, [])
 
-  return { session, isLoading }
+  return { session, isLoading, error }
 }

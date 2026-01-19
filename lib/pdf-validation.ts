@@ -14,7 +14,7 @@ export type { ValidationError, ValidationResult }
  */
 export function validateFile(file: File): ValidationResult {
   // MIMEタイプチェック
-  if (!PDF_MERGE_CONSTANTS.ALLOWED_TYPES.includes(file.type as any)) {
+  if (!PDF_MERGE_CONSTANTS.ALLOWED_TYPES.includes(file.type as typeof PDF_MERGE_CONSTANTS.ALLOWED_TYPES[number])) {
     return {
       success: false,
       error: 'INVALID_TYPE',

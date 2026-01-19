@@ -3,6 +3,7 @@
 import { memo } from 'react'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
+import Image from 'next/image'
 import RotateCw from 'lucide-react/dist/esm/icons/rotate-cw'
 import GripVertical from 'lucide-react/dist/esm/icons/grip-vertical'
 import Check from 'lucide-react/dist/esm/icons/check'
@@ -95,10 +96,13 @@ export const PageCard = memo(function PageCard({
       <div className="aspect-[3/4] bg-muted relative flex items-center justify-center">
         {/* サムネイルがある場合は表示 */}
         {page.thumbnail ? (
-          <img
+          <Image
             src={page.thumbnail}
             alt={`Page ${page.pageNumber}`}
+            width={300}
+            height={400}
             className="w-full h-full object-contain"
+            unoptimized
             style={{
               transform: `rotate(${page.rotation}deg)`,
               transition: 'transform 0.2s ease',

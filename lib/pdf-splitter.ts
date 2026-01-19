@@ -435,7 +435,7 @@ async function splitByEqualPages(
 export function generateSplitFilename(
   baseFilename: string,
   rangeLabel: string,
-  index: number
+  _index: number
 ): string {
   // 拡張子を除去
   const baseName = baseFilename.replace(/\.pdf$/i, '')

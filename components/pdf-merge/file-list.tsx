@@ -10,7 +10,6 @@ import {
   useSensor,
   useSensors,
 } from '@dnd-kit/core'
-import { arrayMove } from '@dnd-kit/sortable'
 import type { FileUpload } from '@/types'
 import { FileCard } from './file-card'
 

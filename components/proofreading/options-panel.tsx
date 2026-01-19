@@ -12,7 +12,6 @@ import Copy from 'lucide-react/dist/esm/icons/copy'
 import CheckCircle2 from 'lucide-react/dist/esm/icons/check-circle-2'
 import Check from 'lucide-react/dist/esm/icons/check'
 import AlertCircle from 'lucide-react/dist/esm/icons/alert-circle'
-import { cn } from "@/lib/utils"
 
 interface OptionsPanelProps {
   options: ProofreadingOptions

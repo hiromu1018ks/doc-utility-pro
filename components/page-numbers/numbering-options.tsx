@@ -11,7 +11,6 @@ import type {
   NumberPosition,
   OddEvenPosition,
 } from '@/types'
-import { DEFAULT_PDF_NUMBERING_OPTIONS } from '@/types'
 import FileText from 'lucide-react/dist/esm/icons/file-text'
 import Download from 'lucide-react/dist/esm/icons/download'
 import Loader2 from 'lucide-react/dist/esm/icons/loader-2'

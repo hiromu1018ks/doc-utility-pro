@@ -267,8 +267,16 @@ export async function createAuditLog(
       },
     })
   } catch (error) {
-    // 監査ログの記録に失敗してもメイン処理には影響しない
-    console.error('Audit log creation failed:', error)
+    // 監査ログの記録に失敗した場合のエラー記録
+    console.error('[AUDIT_LOG_FAILURE]', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+      errorType: error?.constructor?.name,
+      userId,
+      action,
+      timestamp: new Date().toISOString(),
+    })
+    // TODO: 本番環境ではSentry等のモニタリングサービスに送信
+    // Sentry.captureException(error, { tags: { type: 'audit_log_failure' } })
   }
 }
 

@@ -13,21 +13,26 @@ import { Badge } from '@/components/ui/badge'
 import { PdfIcon, DocxIcon, DefaultFileIcon } from './file-icons'
 
 /**
- * Get file icon component based on file type
+ * File icon renderer component
  *
- * Returns fully static memoized components that never re-render,
- * avoiding React reconciliation overhead entirely
+ * Memoized component that renders the appropriate icon based on file type.
+ * Defined at module level with React.memo to prevent unnecessary re-renders
+ * when parent FileCard re-renders with unchanged file type.
  */
-function getFileIcon(type: string) {
+interface FileIconRendererProps {
+  type: string
+}
+
+const FileIconRenderer = memo(function FileIconRenderer({ type }: FileIconRendererProps) {
   switch (type) {
     case 'pdf':
-      return PdfIcon
+      return <PdfIcon />
     case 'docx':
-      return DocxIcon
+      return <DocxIcon />
     default:
-      return DefaultFileIcon
+      return <DefaultFileIcon />
   }
-}
+})
 
 interface FileCardProps {
   file: FileUpload
@@ -91,10 +96,7 @@ export const FileCard = memo(function FileCard({
       )}
 
       {/* File Icon */}
-      {(() => {
-        const IconComponent = getFileIcon(file.type)
-        return <IconComponent />
-      })()}
+      <FileIconRenderer type={file.type} />
 
       {/* File Info */}
       <div className="flex-1 min-w-0">

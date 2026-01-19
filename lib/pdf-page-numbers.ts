@@ -8,7 +8,6 @@ import type {
   PdfNumberingOptions,
   NumberingResult,
   NumberPosition,
-  OddEvenPosition,
   ProcessingProgress,
 } from '@/types'
 

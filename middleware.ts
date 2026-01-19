@@ -18,7 +18,8 @@ export default auth((req) => {
   }
 
   // 未認証でダッシュボードにアクセスした場合、ログインページへリダイレクト
-  if (!req.auth && pathname.startsWith('/dashboard')) {
+  // パブリックルート以外の場合チェック
+  if (!req.auth && !isPublicRoute && pathname.startsWith('/dashboard')) {
     return NextResponse.redirect(new URL('/login', req.url))
   }
 

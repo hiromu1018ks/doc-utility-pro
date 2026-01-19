@@ -12,13 +12,6 @@ import { PageViewer } from '@/components/pdf-pages/page-viewer'
 import { Toolbar } from '@/components/pdf-pages/toolbar'
 import { ExportPanel } from '@/components/pdf-pages/export-panel'
 import { DEFAULT_PDF_PAGE_MANAGE_OPTIONS } from '@/types'
-import dynamic from 'next/dynamic'
-
-// 動的インポート（コード分割）
-const MergeProgress = dynamic(
-  () => import('@/components/pdf-merge/merge-progress').then(m => ({ default: m.MergeProgress })),
-  { ssr: false }
-)
 
 /**
  * PDFページ管理ページ

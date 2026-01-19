@@ -3,7 +3,7 @@
  * メタデータ削除、注釈削除、グレースケール変換、画像圧縮を含むPDF最適化機能
  */
 
-import { PDFDocument, PDFName, PDFDict, PDFArray, PDFStream, PDFContentStream } from 'pdf-lib'
+import { PDFDocument, PDFName } from 'pdf-lib'
 import type { PdfCompressionOptions, CompressionResult, ProcessingProgress } from '@/types'
 import { COMPRESSION_PRESET_CONFIGS, COMPRESSION_LOADING_MESSAGES } from '@/types'
 
@@ -12,14 +12,6 @@ class PdfCompressionError extends Error {
   constructor(message: string, public readonly cause?: Error) {
     super(message)
     this.name = 'PdfCompressionError'
-  }
-}
-
-/** JPEG埋め込みエラー */
-class JpegEmbedError extends Error {
-  constructor(message: string) {
-    super(message)
-    this.name = 'JpegEmbedError'
   }
 }
 
@@ -155,23 +147,6 @@ async function compressPdfImages(
   // 新しいPDFを作成
   const newPdfDoc = await PDFDocument.create()
 
-  // 画像抽出と圧縮のカウンター
-  let processedImages = 0
-  let totalImages = 0
-
-  // まず全ページの画像数をカウント
-  for (let i = 1; i <= pageCount; i++) {
-    const page = await pdfJsDoc.getPage(i)
-    const ops = await page.getOperatorList()
-
-    for (let j = 0; j < ops.fnArray.length; j++) {
-      if (ops.fnArray[j] === pdfjsLib.OPS.paintImageXObject ||
-          ops.fnArray[j] === pdfjsLib.OPS.paintInlineImageXObject) {
-        totalImages++
-      }
-    }
-  }
-
   // 各ページを処理
   for (let pageNum = 1; pageNum <= pageCount; pageNum++) {
     checkCancelled(signal)
@@ -227,7 +202,6 @@ async function compressPdfImages(
 
     // 画像を圧縮
     const compressedBlob = await compressImage(blob, quality, maxWidth, maxHeight)
-    processedImages++
 
     // 圧縮した画像を新しいPDFに埋め込み
     const imageBytes = await compressedBlob.arrayBuffer()
@@ -310,7 +284,7 @@ export async function compressPDF(
 
   // PDFを読み込み
   const arrayBuffer = await file.arrayBuffer()
-  let pdfDoc = await PDFDocument.load(arrayBuffer, { ignoreEncryption: true })
+  const pdfDoc = await PDFDocument.load(arrayBuffer, { ignoreEncryption: true })
 
   const pageCount = pdfDoc.getPageCount()
 

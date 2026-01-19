@@ -5,7 +5,7 @@
 'use client'
 
 import * as React from 'react'
-import { cva, type VariantProps } from 'class-variance-authority'
+import { cva } from 'class-variance-authority'
 import { cn } from '@/lib/utils'
 import type { Notification } from '@/types'
 import X from 'lucide-react/dist/esm/icons/x'
