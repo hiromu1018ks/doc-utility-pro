@@ -7,6 +7,7 @@ import Menu from 'lucide-react/dist/esm/icons/menu'
 import LogOut from 'lucide-react/dist/esm/icons/log-out'
 import { Button } from "@/components/ui/button"
 import { useSession } from "@/hooks/use-session"
+import { ThemeToggle } from "@/components/theme/theme-toggle"
 
 interface HeaderProps {
   title?: string
@@ -56,10 +57,13 @@ export const Header = memo(function Header({ title = "ダッシュボード", on
           />
         </div>
 
+        {/* Theme Toggle */}
+        <ThemeToggle />
+
         {/* Notification */}
-        <Button variant="ghost" size="icon" className="relative">
+        <Button variant="ghost" size="icon" className="relative" aria-label="通知">
           <Bell className="h-5 w-5" />
-          <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-red-500" />
+          <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-error" aria-hidden="true" />
         </Button>
 
         {/* User Info */}

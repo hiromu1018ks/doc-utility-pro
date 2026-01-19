@@ -176,8 +176,8 @@ export function CompressionOptions({
 
         {/* 圧縮結果のサマリー */}
         {compressionResult && (
-          <div className="rounded-lg border border-green-500/50 bg-green-500/10 p-4 space-y-3">
-            <div className="flex items-center gap-2 text-sm font-medium text-green-600 dark:text-green-400">
+          <div className="rounded-lg border border-success/50 bg-success-bg p-4 space-y-3">
+            <div className="flex items-center gap-2 text-sm font-medium text-success-text">
               <FileText className="h-4 w-4" />
               圧縮完了
             </div>
@@ -197,7 +197,7 @@ export function CompressionOptions({
               </div>
               <div>
                 <p className="text-xs text-muted-foreground">削減率</p>
-                <p className="text-sm font-medium text-green-600">
+                <p className="text-sm font-medium text-success">
                   {compressionResult.reductionRate.toFixed(1)}%
                 </p>
               </div>

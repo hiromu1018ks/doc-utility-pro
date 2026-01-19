@@ -104,7 +104,7 @@ export const PageRangeInput = memo(function PageRangeInput({
               showError
                 ? 'border-destructive focus:ring-destructive'
                 : isValid
-                  ? 'border-green-500 focus:ring-green-500'
+                  ? 'border-success focus:ring-success'
                   : 'border-input'
             )}
           />
@@ -114,7 +114,7 @@ export const PageRangeInput = memo(function PageRangeInput({
               {showError ? (
                 <AlertCircle className="h-4 w-4 text-destructive" />
               ) : isValid ? (
-                <Check className="h-4 w-4 text-green-500" />
+                <Check className="h-4 w-4 text-success" />
               ) : null}
             </div>
           )}
@@ -170,7 +170,7 @@ export const PageRangeInput = memo(function PageRangeInput({
 
       {/* 範囲サマリー */}
       {isValid && rangeSummary && !showError && (
-        <div className="flex items-center gap-2 text-sm text-green-600 dark:text-green-400">
+        <div className="flex items-center gap-2 text-sm text-success">
           <Check className="h-4 w-4" />
           <span>{rangeSummary}</span>
         </div>

@@ -38,7 +38,7 @@ export const StreamingIndicator = memo(function StreamingIndicator({
       {/* アニメーションスピナー */}
       <div className="relative" aria-hidden="true">
         <Loader2 className="h-5 w-5 animate-spin text-primary" />
-        <div className="absolute inset-0 h-5 w-5 animate-ping rounded-full bg-primary/20" />
+        <div className="absolute inset-0 h-5 w-5 animate-ping rounded-full bg-primary/20 motion-reduce:hidden" />
       </div>
 
       {/* ステータス表示 */}

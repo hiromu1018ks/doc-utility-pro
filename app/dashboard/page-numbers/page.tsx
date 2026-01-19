@@ -143,10 +143,10 @@ export default function PageNumbersPage() {
 
           {/* 成功メッセージ */}
           {state.numberingResult && (
-            <div className="mb-6 flex items-center gap-3 rounded-lg border border-green-500/50 bg-green-500/10 p-4">
-              <CheckCircle className="h-5 w-5 flex-shrink-0 text-green-500" />
+            <div className="mb-6 flex items-center gap-3 rounded-lg border border-success/50 bg-success-bg p-4">
+              <CheckCircle className="h-5 w-5 flex-shrink-0 text-success" />
               <div className="flex-1">
-                <p className="text-sm font-medium text-green-500">
+                <p className="text-sm font-medium text-success-text">
                   ページ番号の追加が完了しました
                 </p>
                 <p className="text-xs text-muted-foreground">

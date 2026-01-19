@@ -126,8 +126,8 @@ export default function PdfPagesPage() {
 
               {/* 完了メッセージ */}
               {state.result && (
-                <div className="rounded-lg border border-green-500/50 bg-green-500/10 p-4">
-                  <p className="text-sm font-medium text-green-600 dark:text-green-400">
+                <div className="rounded-lg border border-success/50 bg-success-bg p-4">
+                  <p className="text-sm font-medium text-success-text">
                     PDFのエクスポートが完了しました！
                   </p>
                   <p className="mt-1 text-xs text-muted-foreground">

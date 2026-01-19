@@ -186,14 +186,14 @@ export default function PDFCompressPage() {
             <div className={cn(
               "rounded-lg border p-4",
               state.compressionResult.reductionRate > 0
-                ? "border-green-500/50 bg-green-500/10"
-                : "border-blue-500/50 bg-blue-500/10"
+                ? "border-success/50 bg-success-bg"
+                : "border-info/50 bg-info-bg"
             )}>
               <p className={cn(
                 "text-sm font-medium",
                 state.compressionResult.reductionRate > 0
-                  ? "text-green-600 dark:text-green-400"
-                  : "text-blue-600 dark:text-blue-400"
+                  ? "text-success-text"
+                  : "text-info-text"
               )}>
                 {state.compressionResult.reductionRate > 0
                   ? '圧縮が完了しました！'

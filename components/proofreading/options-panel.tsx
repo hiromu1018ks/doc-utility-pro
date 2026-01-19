@@ -217,7 +217,7 @@ export function OptionsPanel({
               <h3 className="text-sm font-semibold text-foreground">統計情報</h3>
 
               <div className="flex items-center gap-2">
-                <CheckCircle2 className="h-4 w-4 text-green-600" />
+                <CheckCircle2 className="h-4 w-4 text-success" />
                 <span className="text-sm text-foreground">
                   {result.summary.totalChanges}件の変更
                 </span>

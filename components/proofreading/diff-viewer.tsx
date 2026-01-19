@@ -120,7 +120,7 @@ export const DiffViewer = memo(function DiffViewer({
         {/* 原文 */}
         <div className="rounded-lg border border-border bg-card shadow-sm overflow-hidden">
           <div className="px-4 py-2 border-b border-border bg-muted/30">
-            <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+            <span className="text-xs font-medium text-muted-foreground uppercase">
               原文
             </span>
           </div>
@@ -138,7 +138,7 @@ export const DiffViewer = memo(function DiffViewer({
         {/* 校正後 */}
         <div className="rounded-lg border border-border bg-card shadow-sm overflow-hidden">
           <div className="px-4 py-2 border-b border-border bg-muted/30">
-            <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+            <span className="text-xs font-medium text-muted-foreground uppercase">
               校正後
             </span>
           </div>

@@ -11,13 +11,13 @@ import File from 'lucide-react/dist/esm/icons/file'
  * 3. Can be shared across all FileCard instances without recreation
  */
 export const PdfIcon = memo(function PdfIcon() {
-  return <FileText className="h-5 w-5 text-red-500" />
+  return <FileText className="h-5 w-5 text-error" />
 })
 
 export const DocxIcon = memo(function DocxIcon() {
-  return <File className="h-5 w-5 text-blue-500" />
+  return <File className="h-5 w-5 text-info" />
 })
 
 export const DefaultFileIcon = memo(function DefaultFileIcon() {
-  return <FileText className="h-5 w-5 text-gray-500" />
+  return <FileText className="h-5 w-5 text-muted-foreground" />
 })

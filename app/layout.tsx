@@ -23,10 +23,39 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ja" className="dark">
+    <html lang="ja" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  const storageKey = 'doc-utility-v1-theme';
+                  let theme = 'system';
+                  try {
+                    const stored = localStorage.getItem(storageKey);
+                    if (stored === 'light' || stored === 'dark' || stored === 'system') {
+                      theme = stored;
+                    }
+                  } catch (e) {
+                    // localStorage unavailable (private mode, cookies disabled)
+                  }
+                  const isDark = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+                  if (isDark) {
+                    document.documentElement.classList.add('dark');
+                  } else {
+                    document.documentElement.classList.remove('dark');
+                  }
+                } catch (e) {
+                  // Fallback: ensure document renders even if script fails
+                  console.error('Theme initialization failed:', e);
+                }
+              })();
+            `,
+          }}
+        />
         {children}
       </body>
     </html>

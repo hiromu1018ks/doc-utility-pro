@@ -149,8 +149,8 @@ export default function PDFSplitPage() {
             <div className="rounded-lg border border-border bg-card p-4 shadow-sm">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-red-500/10">
-                    <FileText className="h-5 w-5 text-red-500" />
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-error/10">
+                    <FileText className="h-5 w-5 text-error" />
                   </div>
                   <div>
                     <p className="text-sm font-medium text-foreground">
@@ -178,8 +178,8 @@ export default function PDFSplitPage() {
           {/* Split Results */}
           {state.splitResult && (
             <div className="space-y-4">
-              <div className="rounded-lg border border-green-500/50 bg-green-500/10 p-4">
-                <p className="text-sm font-medium text-green-600 dark:text-green-400">
+              <div className="rounded-lg border border-success/50 bg-success-bg p-4">
+                <p className="text-sm font-medium text-success-text">
                   分割が完了しました！
                 </p>
                 <p className="mt-1 text-xs text-muted-foreground">
@@ -201,7 +201,7 @@ export default function PDFSplitPage() {
                       className="flex items-center justify-between px-4 py-3 hover:bg-muted/50 transition-colors"
                     >
                       <div className="flex items-center gap-3">
-                        <FileText className="h-4 w-4 text-red-500" />
+                        <FileText className="h-4 w-4 text-error" />
                         <div>
                           <p className="text-sm font-medium text-foreground">
                             {split.filename}

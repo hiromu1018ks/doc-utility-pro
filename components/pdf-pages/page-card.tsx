@@ -21,7 +21,7 @@ interface PageCardProps {
 }
 
 // ホストされたアイコン（パフォーマンス向上）
-const PDF_ICON = <FileText className="h-8 w-8 text-red-500" />
+const PDF_ICON = <FileText className="h-8 w-8 text-error" />
 
 /**
  * ページカードコンポーネント

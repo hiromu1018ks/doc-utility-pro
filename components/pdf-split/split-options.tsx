@@ -272,8 +272,8 @@ export function SplitOptions({
 
         {/* 分割結果のサマリー */}
         {splitResult && (
-          <div className="rounded-lg border border-green-500/50 bg-green-500/10 p-4">
-            <div className="flex items-center gap-2 text-sm font-medium text-green-600 dark:text-green-400">
+          <div className="rounded-lg border border-success/50 bg-success-bg p-4">
+            <div className="flex items-center gap-2 text-sm font-medium text-success-text">
               <FileText className="h-4 w-4" />
               分割完了
             </div>

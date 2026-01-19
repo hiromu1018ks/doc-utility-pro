@@ -465,3 +465,13 @@ export interface Notification {
   timestamp: number
   duration?: number  // 自動消去までのミリ秒数（undefinedで手動消去）
 }
+
+// ============================================================================
+// テーマシステムの型定義
+// ============================================================================
+
+/** テーマ設定 */
+export type Theme = 'light' | 'dark' | 'system'
+
+/** 実際に適用されるテーマ */
+export type AppliedTheme = 'light' | 'dark'

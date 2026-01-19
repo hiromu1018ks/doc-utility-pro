@@ -22,10 +22,10 @@ import type { RecentActivity } from "@/types"
 
 /** 統計カードの静的設定 */
 const STAT_CARD_CONFIG = [
-  { label: "総ドキュメント", icon: FileText, color: "text-blue-500" },
-  { label: "処理済み", icon: CheckCircle, color: "text-green-500" },
-  { label: "失敗", icon: Clock, color: "text-red-500" },
-  { label: "ストレージ使用量", icon: HardDrive, color: "text-orange-500" },
+  { label: "総ドキュメント", icon: FileText, color: "text-primary" },
+  { label: "処理済み", icon: CheckCircle, color: "text-success" },
+  { label: "失敗", icon: Clock, color: "text-error" },
+  { label: "ストレージ使用量", icon: HardDrive, color: "text-warning" },
 ] as const
 
 /** クイックアクセスツール（静的定義） */
@@ -35,28 +35,28 @@ const tools = [
     description: "複数のPDFファイルを1つに結合",
     href: "/dashboard/pdf-merge",
     icon: FileText,
-    color: "bg-blue-500",
+    color: "bg-primary",
   },
   {
     title: "PDF分割",
     description: "PDFファイルを複数に分割",
     href: "/dashboard/pdf-split",
     icon: Layout,
-    color: "bg-purple-500",
+    color: "bg-primary",
   },
   {
     title: "文章校正AI",
     description: "AIによる文書チェック・修正",
     href: "/dashboard/proofreading",
     icon: CheckCircle,
-    color: "bg-green-500",
+    color: "bg-primary",
   },
   {
     title: "圧縮・軽量化",
     description: "ファイルサイズを最適化",
     href: "/dashboard/pdf-compress",
     icon: HardDrive,
-    color: "bg-orange-500",
+    color: "bg-primary",
   },
 ]
 
@@ -97,7 +97,7 @@ const ActivityItem = memo(function ActivityItem({
   return (
     <div className="flex items-center justify-between rounded-lg border border-border bg-card p-3">
       <div className="flex items-center gap-3">
-        <FileText className="h-5 w-5 text-red-500" />
+        <FileText className="h-5 w-5 text-error" />
         <div>
           <p className="text-sm font-medium text-foreground">{activity.fileName}</p>
           <p className="text-xs text-muted-foreground">

@@ -25,7 +25,7 @@ export function TextInput({
   // 使用量に応じて色を変更
   const progressColor =
     percentage > 90 ? "bg-destructive" :
-    percentage > 75 ? "bg-yellow-500" :
+    percentage > 75 ? "bg-warning" :
     "bg-primary"
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {

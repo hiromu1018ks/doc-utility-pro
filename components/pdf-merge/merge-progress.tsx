@@ -25,14 +25,14 @@ export const MergeProgress = memo(function MergeProgress({
   const getStatusIcon = () => {
     switch (progress.stage) {
       case 'completed':
-        return <CheckCircle className="h-5 w-5 text-green-500" />
+        return <CheckCircle className="h-5 w-5 text-success" />
       case 'error':
         return <AlertCircle className="h-5 w-5 text-destructive" />
       default:
         return (
           <div className="relative" aria-hidden="true">
             <Loader2 className="h-5 w-5 animate-spin text-primary" />
-            <div className="absolute inset-0 h-5 w-5 animate-ping rounded-full bg-primary/20" />
+            <div className="absolute inset-0 h-5 w-5 animate-ping rounded-full bg-primary/20 motion-reduce:hidden" />
           </div>
         )
     }
