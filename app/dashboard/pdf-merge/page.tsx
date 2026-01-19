@@ -1,7 +1,9 @@
 'use client'
 
-import { useState, Suspense } from 'react'
+import { useState, Suspense, useEffect } from 'react'
 import { usePdfMerge } from '@/hooks/use-pdf-merge'
+import { useDashboardData } from '@/hooks/use-dashboard-data'
+import { useNotifications } from '@/hooks/use-notifications'
 import dynamic from 'next/dynamic'
 import { DEFAULT_PDF_MERGE_OPTIONS, type PdfMergeOptions } from '@/types'
 import AlertCircle from 'lucide-react/dist/esm/icons/alert-circle'
@@ -63,6 +65,29 @@ const MergeProgress = dynamic(
 export default function PDFMergePage() {
   const [state, actions] = usePdfMerge()
   const [options, setOptions] = useState<PdfMergeOptions>(DEFAULT_PDF_MERGE_OPTIONS)
+  const [, { addActivity }] = useDashboardData()
+  const [, { show }] = useNotifications()
+
+  // Track successful merge completion
+  useEffect(() => {
+    if (state.mergeResult) {
+      addActivity('merge', state.mergeResult.filename, 'completed', {
+        fileSize: state.mergeResult.size,
+        pageCount: state.mergeResult.pages,
+      })
+      show('success', 'PDFの結合が完了しました', `${state.mergeResult.pages}ページのPDFを作成しました`)
+    }
+  }, [state.mergeResult, addActivity, show])
+
+  // Track merge errors
+  useEffect(() => {
+    if (state.error) {
+      addActivity('merge', '複数のPDF', 'failed', {
+        errorMessage: state.error,
+      })
+      show('error', '結合に失敗しました', state.error)
+    }
+  }, [state.error, addActivity, show])
 
   // 結合ステータスの判定
   const mergeStatus: 'idle' | 'processing' | 'completed' | 'error' = state.isProcessing

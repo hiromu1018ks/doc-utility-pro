@@ -1,7 +1,9 @@
 'use client'
 
-import { useState, Suspense } from 'react'
+import { useState, Suspense, useEffect } from 'react'
 import { usePdfCompression } from '@/hooks/use-pdf-compression'
+import { useDashboardData } from '@/hooks/use-dashboard-data'
+import { useNotifications } from '@/hooks/use-notifications'
 import dynamic from 'next/dynamic'
 import { DEFAULT_PDF_COMPRESSION_OPTIONS, type PdfCompressionOptions } from '@/types'
 import AlertCircle from 'lucide-react/dist/esm/icons/alert-circle'
@@ -50,6 +52,35 @@ const CompressionOptions = dynamic(
 export default function PDFCompressPage() {
   const [state, actions] = usePdfCompression()
   const [options, setOptions] = useState<PdfCompressionOptions>(DEFAULT_PDF_COMPRESSION_OPTIONS)
+  const [, { addActivity }] = useDashboardData()
+  const [, { show }] = useNotifications()
+
+  // Track successful compression completion
+  useEffect(() => {
+    if (state.compressionResult) {
+      const reductionPercent = state.compressionResult.reductionRate
+      addActivity('compress', state.compressionResult.filename, 'completed', {
+        fileSize: state.compressionResult.compressedSize,
+        pageCount: state.compressionResult.pages,
+      })
+
+      if (reductionPercent > 0) {
+        show('success', 'PDFの圧縮が完了しました', `${reductionPercent}%のファイルサイズ削減`)
+      } else {
+        show('info', '圧縮処理が完了しました', 'これ以上圧縮できませんでした')
+      }
+    }
+  }, [state.compressionResult, addActivity, show])
+
+  // Track compression errors
+  useEffect(() => {
+    if (state.error) {
+      addActivity('compress', state.file?.name || 'PDFファイル', 'failed', {
+        errorMessage: state.error,
+      })
+      show('error', '圧縮に失敗しました', state.error)
+    }
+  }, [state.error, state.file, addActivity, show])
 
   // 圧縮実行ハンドラ
   const handleCompress = async () => {

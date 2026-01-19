@@ -18,7 +18,7 @@ export interface FileUpload {
 export interface StatCard {
   label: string;
   value: string;
-  icon: string;
+  icon: React.ComponentType<{ className?: string }>;
   color?: string;
 }
 
@@ -414,3 +414,54 @@ export const COMPRESSION_LOADING_MESSAGES = {
 
 /** 認証型を再エクスポート */
 export * from './auth'
+
+// ============================================================================
+// ダッシュボードアクティビティの型定義
+// ============================================================================
+
+/** アクティビティ種別 */
+export type ActivityType =
+  | 'merge'        // PDF結合
+  | 'split'        // PDF分割
+  | 'compress'     // PDF圧縮
+  | 'numbering'    // ページ番号挿入
+  | 'page-manage'  // ページ管理
+  | 'proofread'    // 文章校正
+
+/** アクティビティ記録 */
+export interface Activity {
+  id: string
+  userId: string
+  type: ActivityType
+  fileName: string
+  timestamp: number
+  status: 'completed' | 'failed' | 'processing'
+  fileSize?: number
+  pageCount?: number
+  errorMessage?: string
+}
+
+/** ダッシュボード統計 */
+export interface DashboardStatistics {
+  totalDocuments: number
+  processedCount: number
+  failedCount: number
+  totalStorageUsed: number  // バイト単位
+}
+
+// ============================================================================
+// 通知システムの型定義
+// ============================================================================
+
+/** 通知種別 */
+export type NotificationType = 'success' | 'error' | 'warning' | 'info'
+
+/** 通知 */
+export interface Notification {
+  id: string
+  type: NotificationType
+  title: string
+  message?: string
+  timestamp: number
+  duration?: number  // 自動消去までのミリ秒数（undefinedで手動消去）
+}

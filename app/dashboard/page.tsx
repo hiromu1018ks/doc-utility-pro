@@ -5,19 +5,16 @@ import CheckCircle from 'lucide-react/dist/esm/icons/check-circle'
 import Layout from 'lucide-react/dist/esm/icons/layout'
 import HardDrive from 'lucide-react/dist/esm/icons/hard-drive'
 import ArrowRight from 'lucide-react/dist/esm/icons/arrow-right'
+import Clock from 'lucide-react/dist/esm/icons/clock'
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import Link from "next/link"
 import { useSession } from "@/hooks/use-session"
+import { useDashboardData } from "@/hooks/use-dashboard-data"
+import { formatBytes } from "@/lib/storage"
 
-const stats = [
-  { label: "総ドキュメント", value: "128", icon: FileText, color: "text-blue-500" },
-  { label: "処理済み", value: "96", icon: CheckCircle, color: "text-green-500" },
-  { label: "テンプレート", value: "12", icon: Layout, color: "text-purple-500" },
-  { label: "ストレージ使用量", value: "2.4 GB", icon: HardDrive, color: "text-orange-500" },
-]
-
+// クイックアクセスツール（静的定義）
 const tools = [
   {
     title: "PDF結合",
@@ -49,40 +46,38 @@ const tools = [
   },
 ]
 
-const recentFiles = [
-  {
-    id: "1",
-    name: "2024年度_事業計画書.pdf",
-    action: "結合",
-    time: "2時間前",
-    status: "completed" as const,
-  },
-  {
-    id: "2",
-    name: "会議議事録_10月.docx",
-    action: "校正",
-    time: "5時間前",
-    status: "completed" as const,
-  },
-  {
-    id: "3",
-    name: "製品マニュアル.pdf",
-    action: "分割",
-    time: "1日前",
-    status: "completed" as const,
-  },
-  {
-    id: "4",
-    name: "請求書_2024Q4.pdf",
-    action: "結合",
-    time: "2日前",
-    status: "failed" as const,
-  },
-]
-
 export default function DashboardPage() {
   const { session } = useSession()
+  const [{ stats, recentActivities, isLoading }] = useDashboardData()
   const userName = session?.user?.name || 'ユーザー'
+
+  // 統計カードを動的に生成
+  const statsCards = [
+    {
+      label: "総ドキュメント",
+      value: stats.totalDocuments.toString(),
+      icon: FileText,
+      color: "text-blue-500",
+    },
+    {
+      label: "処理済み",
+      value: stats.processedCount.toString(),
+      icon: CheckCircle,
+      color: "text-green-500",
+    },
+    {
+      label: "失敗",
+      value: stats.failedCount.toString(),
+      icon: Clock,
+      color: "text-red-500",
+    },
+    {
+      label: "ストレージ使用量",
+      value: formatBytes(stats.totalStorageUsed),
+      icon: HardDrive,
+      color: "text-orange-500",
+    },
+  ]
 
   return (
     <div className="space-y-6 p-6">
@@ -98,7 +93,7 @@ export default function DashboardPage() {
 
       {/* Stats Cards */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {stats.map((stat) => {
+        {statsCards.map((stat) => {
           const Icon = stat.icon
           return (
             <Card key={stat.label}>
@@ -156,36 +151,53 @@ export default function DashboardPage() {
             <h3 className="text-lg font-semibold text-foreground">
               最近のアクティビティ
             </h3>
-            <Button variant="ghost" size="sm">
-              すべて表示
-              <ArrowRight className="ml-1 h-4 w-4" />
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => window.location.reload()}
+            >
+              更新
+              <Clock className="ml-1 h-4 w-4" />
             </Button>
           </div>
-          <div className="space-y-3">
-            {recentFiles.map((file) => (
-              <div
-                key={file.id}
-                className="flex items-center justify-between rounded-lg border border-border bg-card p-3"
-              >
-                <div className="flex items-center gap-3">
-                  <FileText className="h-5 w-5 text-red-500" />
-                  <div>
-                    <p className="text-sm font-medium text-foreground">
-                      {file.name}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {file.action}・{file.time}
-                    </p>
-                  </div>
-                </div>
-                <Badge
-                  variant={file.status === "completed" ? "default" : "destructive"}
+
+          {isLoading ? (
+            <div className="flex items-center justify-center py-8">
+              <div className="text-muted-foreground">読み込み中...</div>
+            </div>
+          ) : recentActivities.length > 0 ? (
+            <div className="space-y-3">
+              {recentActivities.map((activity) => (
+                <div
+                  key={activity.id}
+                  className="flex items-center justify-between rounded-lg border border-border bg-card p-3"
                 >
-                  {file.status === "completed" ? "完了" : "失敗"}
-                </Badge>
-              </div>
-            ))}
-          </div>
+                  <div className="flex items-center gap-3">
+                    <FileText className="h-5 w-5 text-red-500" />
+                    <div>
+                      <p className="text-sm font-medium text-foreground">
+                        {activity.fileName}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {activity.action}・{activity.time}
+                      </p>
+                    </div>
+                  </div>
+                  <Badge
+                    variant={activity.status === "completed" ? "default" : "destructive"}
+                  >
+                    {activity.status === "completed" ? "完了" : "失敗"}
+                  </Badge>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8 text-muted-foreground">
+              <FileText className="mx-auto h-12 w-12 mb-3 opacity-50" />
+              <p>まだアクティビティがありません</p>
+              <p className="text-sm mt-1">PDFツールを使用して開始してください</p>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

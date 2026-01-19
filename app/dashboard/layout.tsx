@@ -3,6 +3,8 @@
 import { useState, useMemo, useCallback } from "react"
 import { Sidebar } from "@/components/dashboard/sidebar"
 import { Header } from "@/components/dashboard/header"
+import { ToastContainer, Toast } from "@/components/ui/toast"
+import { useNotifications } from "@/hooks/use-notifications"
 import { usePathname } from "next/navigation"
 
 // Page title mapping moved outside component for better performance
@@ -28,6 +30,7 @@ export default function DashboardLayout({
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const pathname = usePathname()
+  const [{ notifications }, { dismiss }] = useNotifications()
 
   // Memoize title calculation to avoid recreation on every render
   const title = useMemo(() => getPageTitle(pathname || "/"), [pathname])
@@ -65,6 +68,17 @@ export default function DashboardLayout({
         <Header title={title} onMenuClick={handleMenuClick} />
         <main className="flex-1 overflow-auto">{children}</main>
       </div>
+
+      {/* Notification Container */}
+      <ToastContainer>
+        {notifications.map((notification) => (
+          <Toast
+            key={notification.id}
+            notification={notification}
+            onDismiss={dismiss}
+          />
+        ))}
+      </ToastContainer>
     </div>
   )
 }

@@ -1,10 +1,12 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import AlertCircle from 'lucide-react/dist/esm/icons/alert-circle'
 import X from 'lucide-react/dist/esm/icons/x'
 import { Button } from '@/components/ui/button'
 import { usePdfPages } from '@/hooks/use-pdf-pages'
+import { useDashboardData } from '@/hooks/use-dashboard-data'
+import { useNotifications } from '@/hooks/use-notifications'
 import { PageGrid } from '@/components/pdf-pages/page-grid'
 import { PageViewer } from '@/components/pdf-pages/page-viewer'
 import { Toolbar } from '@/components/pdf-pages/toolbar'
@@ -25,6 +27,29 @@ const MergeProgress = dynamic(
 export default function PdfPagesPage() {
   const [state, actions] = usePdfPages()
   const [keepFilename, setKeepFilename] = useState(DEFAULT_PDF_PAGE_MANAGE_OPTIONS.keepFilename)
+  const [, { addActivity }] = useDashboardData()
+  const [, { show }] = useNotifications()
+
+  // Track successful PDF export completion
+  useEffect(() => {
+    if (state.result) {
+      addActivity('page-manage', state.result.filename, 'completed', {
+        fileSize: state.result.size,
+        pageCount: state.result.pages,
+      })
+      show('success', 'PDFのエクスポートが完了しました', `${state.result.pages}ページのPDFを作成しました`)
+    }
+  }, [state.result, addActivity, show])
+
+  // Track PDF management errors
+  useEffect(() => {
+    if (state.error) {
+      addActivity('page-manage', state.file?.name || 'PDFファイル', 'failed', {
+        errorMessage: state.error,
+      })
+      show('error', '処理に失敗しました', state.error)
+    }
+  }, [state.error, state.file, addActivity, show])
 
   // ファイル名を抽出
   const fileName = useMemo(() => state.file?.name || null, [state.file])

@@ -5,8 +5,10 @@
 
 'use client'
 
-import { useState, Suspense } from 'react'
+import { useState, Suspense, useEffect } from 'react'
 import { usePdfPageNumbers } from '@/hooks/use-pdf-page-numbers'
+import { useDashboardData } from '@/hooks/use-dashboard-data'
+import { useNotifications } from '@/hooks/use-notifications'
 import { DEFAULT_PDF_NUMBERING_OPTIONS, type PdfNumberingOptions } from '@/types'
 import AlertCircle from 'lucide-react/dist/esm/icons/alert-circle'
 import FileText from 'lucide-react/dist/esm/icons/file-text'
@@ -59,6 +61,28 @@ export default function PageNumbersPage() {
   const [options, setOptions] = useState<PdfNumberingOptions>(
     DEFAULT_PDF_NUMBERING_OPTIONS
   )
+  const [, { addActivity }] = useDashboardData()
+  const [, { show }] = useNotifications()
+
+  // Track successful page numbering completion
+  useEffect(() => {
+    if (state.numberingResult) {
+      addActivity('numbering', state.numberingResult.filename, 'completed', {
+        pageCount: state.numberingResult.pages,
+      })
+      show('success', 'ページ番号の追加が完了しました', `${state.numberingResult.pages}ページのPDFを作成しました`)
+    }
+  }, [state.numberingResult, addActivity, show])
+
+  // Track page numbering errors
+  useEffect(() => {
+    if (state.error) {
+      addActivity('numbering', state.file?.name || 'PDFファイル', 'failed', {
+        errorMessage: state.error,
+      })
+      show('error', 'ページ番号の追加に失敗しました', state.error)
+    }
+  }, [state.error, state.file, addActivity, show])
 
   /**
    * ファイル選択ハンドラ

@@ -1,7 +1,9 @@
 'use client'
 
-import { useState, Suspense } from 'react'
+import { useState, Suspense, useEffect } from 'react'
 import { usePdfSplit } from '@/hooks/use-pdf-split'
+import { useDashboardData } from '@/hooks/use-dashboard-data'
+import { useNotifications } from '@/hooks/use-notifications'
 import { DEFAULT_PDF_SPLIT_OPTIONS, type PdfSplitOptions } from '@/types'
 import AlertCircle from 'lucide-react/dist/esm/icons/alert-circle'
 import X from 'lucide-react/dist/esm/icons/x'
@@ -43,6 +45,28 @@ const MergeProgress = dynamic(
 export default function PDFSplitPage() {
   const [state, actions] = usePdfSplit()
   const [options, setOptions] = useState<PdfSplitOptions>(DEFAULT_PDF_SPLIT_OPTIONS)
+  const [, { addActivity }] = useDashboardData()
+  const [, { show }] = useNotifications()
+
+  // Track successful split completion
+  useEffect(() => {
+    if (state.splitResult) {
+      addActivity('split', state.file?.name || 'PDFファイル', 'completed', {
+        pageCount: state.splitResult.totalSplits,
+      })
+      show('success', 'PDFの分割が完了しました', `${state.splitResult.totalSplits}個のPDFを生成しました`)
+    }
+  }, [state.splitResult, state.file, addActivity, show])
+
+  // Track split errors
+  useEffect(() => {
+    if (state.error) {
+      addActivity('split', state.file?.name || 'PDFファイル', 'failed', {
+        errorMessage: state.error,
+      })
+      show('error', '分割に失敗しました', state.error)
+    }
+  }, [state.error, state.file, addActivity, show])
 
   // 分割ステータスの判定
   const splitStatus: 'idle' | 'processing' | 'completed' | 'error' = state.isProcessing
