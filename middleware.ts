@@ -3,6 +3,9 @@
 import { auth } from '@/lib/auth'
 import { NextResponse } from 'next/server'
 
+// Node.js ランタイムを使用（Edge Function のサイズ制限を回避）
+export const runtime = 'nodejs'
+
 export default auth((req) => {
   const { pathname } = req.nextUrl
 
