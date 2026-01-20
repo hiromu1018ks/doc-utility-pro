@@ -250,6 +250,7 @@ export function getActivityLabel(type: ActivityType): string {
     numbering: 'ページ番号',
     'page-manage': 'ページ管理',
     proofread: '校正',
+    transcription: '文字起こし',
   }
   return labels[type] ?? type
 }
