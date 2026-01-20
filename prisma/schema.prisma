@@ -27,6 +27,10 @@ model User {
   accounts              Account[]
   sessions              Session[]
   auditLogs             AuditLog[]
+
+  // 音声認識機能リレーション
+  transcriptionJobs     TranscriptionJob[]
+  minutesTemplates      MinutesTemplate[]
 }
 
 // NextAuth.js Accountモデル（OAuth等の将来拡張用）
@@ -98,4 +102,82 @@ enum AuditAction {
   LOGIN_FAILURE
   ACCOUNT_LOCKED
   ACCOUNT_UNLOCKED
+}
+
+// ============================================================================
+// 音声文字起こし＆議事録機能
+// ============================================================================
+
+// 文字起こしジョブ
+model TranscriptionJob {
+  id                String              @id @default(cuid())
+  userId            String
+  user              User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // ファイル情報
+  originalFileName  String
+  fileSize          Int                 // バイト単位
+  mimeType          String
+
+  // 処理ステータス
+  status            TranscriptionStatus @default(PENDING)
+  currentStep       ProcessingStep      @default(UPLOADING)
+  progressPercent   Int                 @default(0) // 0-100
+  errorMessage      String?
+
+  // AI処理結果
+  transcription     String?             @db.Text // 文字起こしテキスト
+  meetingMinutes    String?             @db.Text // 議事録（Markdown）
+  templateId        String?             // 使用テンプレートID
+
+  // タイムスタンプ
+  createdAt         DateTime            @default(now())
+  startedAt         DateTime?
+  completedAt       DateTime?
+  expiresAt         DateTime            // 自動削除用（7日後）
+
+  @@index([userId, createdAt])
+  @@index([status, createdAt])
+}
+
+// 文字起こしステータス
+enum TranscriptionStatus {
+  PENDING      // 処理待ち
+  PROCESSING   // 処理中
+  COMPLETED    // 完了
+  FAILED       // 失敗
+  EXPIRED      // 期限切れ
+}
+
+// 処理ステップ
+enum ProcessingStep {
+  UPLOADING        // アップロード中
+  VALIDATING       // バリデーション中
+  TRANSCRIBING     // 文字起こし中
+  GENERATING       // 議事録生成中
+  FINALIZING       // 最終処理中
+}
+
+// 議事録テンプレート（ユーザーカスタマイズ用）
+model MinutesTemplate {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // プリセット識別子（プリセットの場合）
+  presetId    String?  @unique
+
+  name        String
+  description String?  @db.Text
+  prompt      String   @db.Text // Geminiに渡すプロンプト
+
+  // 出力フォーマット（JSON）
+  outputFormat Json? // { sections: [...], includeTimestamps: bool }
+
+  isDefault   Boolean  @default(false)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId, isDefault])
 }

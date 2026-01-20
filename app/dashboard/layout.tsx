@@ -18,6 +18,7 @@ function getPageTitle(pathname: string): string {
   if (pathname?.includes("pdf-split")) return "PDF分割"
   if (pathname?.includes("pdf-pages")) return "PDFページ管理"
   if (pathname?.includes("proofreading")) return "文章校正AI"
+  if (pathname?.includes("transcription")) return "音声認識・議事録"
   if (pathname?.includes("page-numbers")) return "ページ番号挿入"
   if (pathname?.includes("compress")) return "圧縮・軽量化"
   return "ダッシュボード"

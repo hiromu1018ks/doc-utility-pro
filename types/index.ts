@@ -427,6 +427,7 @@ export type ActivityType =
   | 'numbering'    // ページ番号挿入
   | 'page-manage'  // ページ管理
   | 'proofread'    // 文章校正
+  | 'transcription' // 音声文字起こし
 
 /** アクティビティ記録 */
 export interface Activity {
@@ -475,3 +476,101 @@ export type Theme = 'light' | 'dark' | 'system'
 
 /** 実際に適用されるテーマ */
 export type AppliedTheme = 'light' | 'dark'
+
+// ============================================================================
+// 音声文字起こし＆議事録機能の型定義
+// ============================================================================
+
+/** 文字起こしステータス */
+export type TranscriptionStatus = 'PENDING' | 'PROCESSING' | 'COMPLETED' | 'FAILED' | 'EXPIRED'
+
+/** 処理ステップ */
+export type ProcessingStep = 'UPLOADING' | 'VALIDATING' | 'TRANSCRIBING' | 'GENERATING' | 'FINALIZING'
+
+/** 処理進捗 */
+export interface TranscriptionProgress {
+  stage: ProcessingStep
+  percentage: number // 0-100
+  message: string
+}
+
+/** 文字起こしジョブ */
+export interface TranscriptionJob {
+  id: string
+  userId: string
+  originalFileName: string
+  fileSize: number
+  mimeType: string
+  status: TranscriptionStatus
+  currentStep: ProcessingStep
+  progressPercent: number
+  errorMessage?: string
+  transcription?: string
+  meetingMinutes?: string
+  templateId?: string
+  createdAt: Date
+  startedAt?: Date
+  completedAt?: Date
+  expiresAt: Date
+}
+
+/** 議事録テンプレート */
+export interface MinutesTemplate {
+  id: string
+  userId: string
+  presetId?: string
+  name: string
+  description?: string
+  prompt: string
+  outputFormat?: TemplateOutputFormat
+  isDefault: boolean
+  createdAt: Date
+  updatedAt: Date
+}
+
+/** テンプレート出力フォーマット */
+export interface TemplateOutputFormat {
+  sections: TemplateSection[]
+  includeTimestamps: boolean
+  includeSpeakers: boolean
+}
+
+/** テンプレートセクション */
+export interface TemplateSection {
+  id: string
+  title: string
+  description?: string
+  required: boolean
+  order: number
+}
+
+/** 音声アップロードオプション */
+export interface AudioUploadOptions {
+  templateId?: string
+}
+
+/** 音声バリデーション結果 */
+export type AudioValidationResult =
+  | { success: true }
+  | { success: false; error: AudioValidationError; message: string }
+
+/** 音声バリデーションエラー */
+export type AudioValidationError =
+  | 'INVALID_TYPE'
+  | 'FILE_TOO_LARGE'
+  | 'FILE_TOO_SMALL'
+  | 'MAX_FILES_EXCEEDED'
+
+/** デフォルトの音声アップロードオプション */
+export const DEFAULT_AUDIO_UPLOAD_OPTIONS: AudioUploadOptions = {
+  templateId: 'standard',
+} as const
+
+/** 文字起こし結果 */
+export interface TranscriptionResult {
+  transcript: string
+  minutes: string
+  fileName: string
+  templateId: string
+  timestamp: number
+}

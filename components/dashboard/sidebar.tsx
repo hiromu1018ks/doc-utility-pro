@@ -9,6 +9,7 @@ import Type from 'lucide-react/dist/esm/icons/type'
 import Archive from 'lucide-react/dist/esm/icons/archive'
 import Edit3 from 'lucide-react/dist/esm/icons/edit-3'
 import Users from 'lucide-react/dist/esm/icons/users'
+import Mic from 'lucide-react/dist/esm/icons/mic'
 import X from 'lucide-react/dist/esm/icons/x'
 import LogOut from 'lucide-react/dist/esm/icons/log-out'
 import Link from "next/link"
@@ -21,6 +22,7 @@ import { useSession } from "@/hooks/use-session"
 const navItems: NavItem[] = [
   { label: "ホーム", href: "/dashboard", icon: "home" },
   { label: "文章校正AI", href: "/dashboard/proofreading", icon: "sparkles" },
+  { label: "音声認識・議事録", href: "/dashboard/transcription", icon: "mic" },
   { label: "PDF結合", href: "/dashboard/pdf-merge", icon: "files" },
   { label: "PDF分割", href: "/dashboard/pdf-split", icon: "scissors" },
   { label: "PDFページ管理", href: "/dashboard/pdf-pages", icon: "edit3" },
@@ -31,6 +33,7 @@ const navItems: NavItem[] = [
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   home: Home,
   sparkles: Sparkles,
+  mic: Mic,
   files: Files,
   scissors: Scissors,
   edit3: Edit3,
