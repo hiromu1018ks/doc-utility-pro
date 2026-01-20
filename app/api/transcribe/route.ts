@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { GoogleGenerativeAI } from "@google/generative-ai"
 import { checkRateLimit } from "@/lib/rate-limit"
-import { MEETING_MINUTES_TEMPLATES } from "@/lib/constants"
+import { MEETING_MINUTES_TEMPLATES, AUDIO_TRANSCRIPTION_CONSTANTS } from "@/lib/constants"
 import { auth } from "@/lib/auth"
 
 // タイムアウトを延長（音声処理は時間がかかるため）
@@ -56,18 +56,16 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    // ファイルサイズチェック（500MB）
-    const MAX_SIZE = 500 * 1024 * 1024
-    if (file.size > MAX_SIZE) {
+    // ファイルサイズチェック
+    if (file.size > AUDIO_TRANSCRIPTION_CONSTANTS.MAX_FILE_SIZE) {
       return NextResponse.json(
-        { error: `ファイルサイズが大きすぎます（最大${MAX_SIZE / (1024 * 1024)}MB）` },
+        { error: `ファイルサイズが大きすぎます（最大${AUDIO_TRANSCRIPTION_CONSTANTS.MAX_FILE_SIZE / (1024 * 1024)}MB）` },
         { status: 400 }
       )
     }
 
     // ファイルタイプチェック
-    const ALLOWED_TYPES = ["audio/mpeg", "audio/mp3", "audio/wav", "audio/wave", "audio/aac", "audio/flac", "audio/x-flac", "audio/mp4", "audio/x-m4a"]
-    if (!ALLOWED_TYPES.includes(file.type)) {
+    if (!AUDIO_TRANSCRIPTION_CONSTANTS.ALLOWED_TYPES.includes(file.type)) {
       return NextResponse.json(
         { error: "対応していないファイル形式です（MP3/WAV/AAC/FLAC/M4A）" },
         { status: 400 }

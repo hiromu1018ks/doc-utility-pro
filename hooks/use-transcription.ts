@@ -65,7 +65,10 @@ export function useTranscription(): [TranscriptionState, TranscriptionActions] {
       clearInterval(progressInterval)
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: "不明なエラー" }))
+        const errorData = await response.json().catch((err) => {
+          console.error("[TRANSCRIPTION_JSON_PARSE_ERROR]", err)
+          return { error: "不明なエラー" }
+        })
         throw new Error(errorData.error || "処理に失敗しました")
       }
 

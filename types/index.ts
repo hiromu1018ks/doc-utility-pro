@@ -481,9 +481,6 @@ export type AppliedTheme = 'light' | 'dark'
 // 音声文字起こし＆議事録機能の型定義
 // ============================================================================
 
-/** サポートする音声フォーマット */
-export type AudioFormat = 'mp3' | 'wav' | 'aac' | 'flac' | 'm4a'
-
 /** 文字起こしステータス */
 export type TranscriptionStatus = 'PENDING' | 'PROCESSING' | 'COMPLETED' | 'FAILED' | 'EXPIRED'
 
