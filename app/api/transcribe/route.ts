@@ -65,7 +65,8 @@ export async function POST(req: NextRequest) {
     }
 
     // ファイルタイプチェック
-    if (!AUDIO_TRANSCRIPTION_CONSTANTS.ALLOWED_TYPES.includes(file.type)) {
+    const allowedTypes: readonly string[] = AUDIO_TRANSCRIPTION_CONSTANTS.ALLOWED_TYPES
+    if (!allowedTypes.includes(file.type)) {
       return NextResponse.json(
         { error: "対応していないファイル形式です（MP3/WAV/AAC/FLAC/M4A）" },
         { status: 400 }
